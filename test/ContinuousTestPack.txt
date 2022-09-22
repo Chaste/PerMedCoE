@@ -1,1 +1,2 @@
+unit_tests/TestDiffusionSmall.hpp
 TestHello.hpp
