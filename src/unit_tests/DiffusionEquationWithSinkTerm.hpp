@@ -59,7 +59,7 @@ public:
     double ComputeSourceTerm(const ChastePoint<SPACE_DIM>& rX, double, Element<SPACE_DIM, SPACE_DIM>*)
     {
         double sink_strength = 0.0;
-        if (norm_inf(rX.rGetLocation() - mSinkLocation) < mSinkRadius)
+        if (norm_inf(rX.rGetLocation() - mSinkLocation) <= mSinkRadius)
         {
             sink_strength = mUptake;
         }
