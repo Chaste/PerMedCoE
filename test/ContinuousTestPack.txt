@@ -1,2 +1,4 @@
+unit_tests/TestDiffusionSmall.hpp
+TestDiffusionEquationWithSinkTerm.hpp
 TestFixedDurationCellCycle.hpp
 TestStochasticDurationCellCycle.hpp
