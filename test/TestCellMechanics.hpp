@@ -40,8 +40,23 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Most Chaste code uses PETSc to solve linear algebra problems.  This involves starting PETSc at the beginning of a test-suite
  * and closing it at the end.  (If you never run code in parallel then it is safe to replace PetscSetupAndFinalize.hpp with FakePetscSetup.hpp)
  */
+#include "CheckpointArchiveTypes.hpp"
+#include "SmartPointers.hpp"
+#include "VoronoiDataWriter.hpp"
+#include "NodeLocationWriter.hpp"
+#include "AbstractCellBasedTestSuite.hpp"
 #include "PetscSetupAndFinalize.hpp"
-#include "Hello.hpp"
+#include "CellsGenerator.hpp"
+#include "NoCellCycleModel.hpp"
+#include "VertexBasedCellPopulation.hpp"
+#include "OffLatticeSimulation.hpp"
+#include "TransitCellProliferativeType.hpp"
+#include "HoneycombVertexMeshGenerator.hpp"
+#include "RepulsionForce.hpp"
+#include "FakePetscSetup.hpp"
+
+#include "DragForce.hpp"
+#include "ExperiencesDrag.hpp"
 
 /**
  * @file
@@ -60,19 +75,59 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * components of Chaste.
  */
 
-class TestHello : public CxxTest::TestSuite
+class TestHello : public AbstractCellBasedTestSuite
 {
 public:
-    void TestHelloClass()
-    {
-        // Create an object called 'world' of class 'Hello',
-        // (Hello.hpp is #included from the 'src' folder.)
-        Hello world("Hello world!");
+/*
+ * 1 unit in Chaste is ~ 1 cell width/10um
+ * The cell should move with an initial velocity of 10um/minute, i.e. 1 cell width/minute
+ * Timestep is 0.1 minutes, i.e. 10 steps/cell width
+ * Total time = 10mins, i.e. 10 cell widths of movement without friction
+*/
+    void TestCellMechanicsCellMovement() {
 
-        // The TS_ASSERT macros are used to test that the object performs as expected
-        TS_ASSERT_EQUALS(world.GetMessage(), "Hello world!");
-        TS_ASSERT_THROWS_THIS(world.Complain("I don't like you"),
-                              "I don't like you");
+      // Generate a mesh
+      HoneycombVertexMeshGenerator generator(1, 1);
+      MutableVertexMesh<2,2>* p_mesh = generator.GetMesh();
+
+      // Add the cell 
+      std::vector<CellPtr> cells;
+      MAKE_PTR(TransitCellProliferativeType, p_transit_type);
+      MAKE_PTR(WildTypeCellMutationState, p_state); 
+      MAKE_PTR(ExperiencesDrag, p_drag);
+      p_drag->coefficient = 0.001;
+
+      for (unsigned int i = 0; i < p_mesh->GetNumElements(); i++) {
+        auto cell_cycle_model = new NoCellCycleModel();
+        CellPropertyCollection collection;
+        collection.AddProperty(p_drag);
+        CellPtr cell(new Cell(p_state, cell_cycle_model, nullptr, false, collection));
+        cell->SetCellProliferativeType(p_transit_type);
+        cell->SetBirthTime(0);
+        cells.push_back(cell);
+      }
+
+      // Set initial conditions
+      c_vector<double, 2> initialVelocity;
+      initialVelocity[0] = 1.0;
+      initialVelocity[1] = 0.0;
+
+      MAKE_PTR(DragForce<2>, force);
+      force->SetVelocity(initialVelocity);
+
+      // Setup cell population
+      VertexBasedCellPopulation<2> cell_population(*p_mesh, cells);
+
+      // Set up simulator
+      OffLatticeSimulation<2> simulator(cell_population);
+      simulator.SetOutputDirectory("CellBasedDemo1");
+      simulator.SetEndTime(1.0 / 6.0); // 10 mins
+      simulator.SetDt(1.0 / (60.0 * 10.0)); // 0.1 mins
+      simulator.AddForce(force);
+
+      // Perform simulation
+      simulator.Solve();
+
     }
 };
 
