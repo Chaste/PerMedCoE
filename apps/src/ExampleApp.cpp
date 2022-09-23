@@ -48,7 +48,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PetscTools.hpp"
 #include "PetscException.hpp"
 
-#include "Hello.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -73,8 +72,6 @@ int main(int argc, char *argv[])
                 if (PetscTools::AmMaster())
                 {
                     std::string arg_i(argv[i]);
-                    Hello world(arg_i);
-                    std::cout << "Argument " << i << " is " << world.GetMessage() << std::endl << std::flush;
                 }
             }
         }
