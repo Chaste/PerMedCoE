@@ -75,7 +75,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * components of Chaste.
  */
 
-class TestHello : public AbstractCellBasedTestSuite
+class TestCellMechanics : public AbstractCellBasedTestSuite
 {
 public:
 /*
