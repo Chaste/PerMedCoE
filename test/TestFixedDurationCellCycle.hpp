@@ -33,8 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef TESTCELLCYCLEFIXED_HPP_
-#define TESTCELLCYCLEFIXED_HPP_
+#ifndef TESTFIXEDDURATIONCELLCYCLE_HPP_
+#define TESTFIXEDDURATIONCELLCYCLE_HPP_
 
 #include <cxxtest/TestSuite.h>
 #include "AbstractCellBasedTestSuite.hpp"
@@ -48,6 +48,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NodesOnlyMesh.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "SphereGeometryBoundaryCondition.hpp"
+
 #include "FixedDurationCellCycleModel.hpp"
 
 // Chaste uses PETSc to solve linear algebra problems.
@@ -55,10 +56,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // This code will never run in parallel so we use FakePetscSetup.hpp.
 #include "FakePetscSetup.hpp"
 
-class TestCellCycle : public AbstractCellBasedTestSuite
+class TestFixedDurationCellCycle : public AbstractCellBasedTestSuite
 {
 public:
-    void TestFixedDurationCellCycle()
+    void TestNodeBasedFixedDurationCellCycle()
     {
         // We cannot currently run node based simulations in parallel.
         EXIT_IF_PARALLEL;
@@ -108,4 +109,4 @@ public:
     }
 };
 
-#endif /*TESTCELLCYCLEFIXED_HPP_*/
+#endif /*TESTFIXEDDURATIONCELLCYCLE_HPP_*/

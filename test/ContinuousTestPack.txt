@@ -1,1 +1,2 @@
-TestCellCycle.hpp
+TestFixedDurationCellCycle.hpp
+TestStochasticDurationCellCycle.hpp
