@@ -48,11 +48,11 @@ class FixedDurationCellCycleModel : public AbstractSimpleGenerationalCellCycleMo
 {
 private:
     // We wish to archive (save or load) the cell-cycle model object in a cell-based simulation. 
-    // The serialize method archives the cell cycle model using the serialization code defined in AbstractSimpleGenerationalCellCycleModel.
     friend class boost::serialization::access;
     template<class Archive>
     void serialize(Archive & archive, const unsigned int version)
     {
+        // Archive the cell cycle model using the serialization code defined in AbstractSimpleGenerationalCellCycleModel.
         archive & boost::serialization::base_object<AbstractSimpleGenerationalCellCycleModel>(*this);
     }
 
@@ -61,36 +61,28 @@ private:
     {
         assert(mpCell != NULL);  // Make sure cell exists
 
-        mG1Duration = 7;
+        mG1Duration = 7.0;
     }
 
     void SetSDuration()
     {
         assert(mpCell != NULL);  // Make sure cell exists
 
-        mSDuration = 6;
+        mSDuration = 6.0;
     }
 
     void SetG2Duration()
     {
         assert(mpCell != NULL);  // Make sure cell exists
 
-        mG2Duration = 3;
+        mG2Duration = 3.0;
     }
     
     void SetMDuration()
     {
         assert(mpCell != NULL);  // Make sure cell exists
 
-        mMDuration = 2;
-    }
-
-    // Minimum possible duration of either of the gap phases (G1 or G2)
-    void SetMinimumGapDuration()
-    {
-        assert(mpCell != NULL);  // Make sure cell exists
-
-        mMinimumGapDuration = 3;
+        mMDuration = 2.0;
     }
 
 public:
@@ -115,6 +107,7 @@ public:
         p_model->SetBirthTime(mBirthTime);
         p_model->SetStemCellG1Duration(mG1Duration);
         p_model->SetTransitCellG1Duration(mG1Duration);
+        //p_model->SetMinimumGapDuration(3.0);
         p_model->SetGeneration(mGeneration);
         p_model->SetMaxTransitGenerations(mMaxTransitGenerations);
 
