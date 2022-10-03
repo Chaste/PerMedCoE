@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2005-2021, University of Oxford.
+Copyright (c) 2005-2022, University of Oxford.
 All rights reserved.
 
 University of Oxford means the Chancellor, Masters and Scholars of the
@@ -36,94 +36,35 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FIXEDDURATIONCELLCYCLEMODEL_HPP_
 #define FIXEDDURATIONCELLCYCLEMODEL_HPP_
 
-#include "CheckpointArchiveTypes.hpp"
-#include "SmartPointers.hpp"
-#include "Exception.hpp"
-
 #include "AbstractSimpleGenerationalCellCycleModel.hpp"
 
-// This cell-cycle model is simple i.e. the duration of each phase is determined when the cell-cycle model is created.
-// It is also generation-based i.e. it keeps track of the generation of the corresponding cell, and sets the cell type accordingly.
+// "Simple" cell-cycle model: phase durations are determined when the cell-cycle model is created.
+// "Generational" cell-cycle model: tracks generation of corresponding cell and sets cell type accordingly.
 class FixedDurationCellCycleModel : public AbstractSimpleGenerationalCellCycleModel
 {
 private:
-    // We wish to archive (save or load) the cell-cycle model object in a cell-based simulation. 
+    // For archiving (saving or loading) the cell-cycle model object in a cell-based simulation. 
     friend class boost::serialization::access;
     template<class Archive>
-    void serialize(Archive & archive, const unsigned int version)
-    {
-        // Archive the cell cycle model using the serialization code defined in AbstractSimpleGenerationalCellCycleModel.
-        archive & boost::serialization::base_object<AbstractSimpleGenerationalCellCycleModel>(*this);
-    }
+    void serialize(Archive & archive, const unsigned int version);
 
     // Override phase duration methods
-    void SetG1Duration()
-    {
-        assert(mpCell != NULL);  // Make sure cell exists
-
-        mG1Duration = 7.0;
-    }
-
-    void SetSDuration()
-    {
-        assert(mpCell != NULL);  // Make sure cell exists
-
-        mSDuration = 6.0;
-    }
-
-    void SetG2Duration()
-    {
-        assert(mpCell != NULL);  // Make sure cell exists
-
-        mG2Duration = 3.0;
-    }
-    
-    void SetMDuration()
-    {
-        assert(mpCell != NULL);  // Make sure cell exists
-
-        mMDuration = 2.0;
-    }
+    void SetG1Duration();
+    void SetSDuration();
+    void SetG2Duration();
+    void SetMDuration();
 
 public:
+    FixedDurationCellCycleModel() {}
 
-    FixedDurationCellCycleModel()
-    {}
-
-    // Override CreateCellCycleModel(). 
-    // This is a builder method to create new copies of the cell-cycle model.
-    // We first create a new cell-cycle model, then set each member variable of the new cell-cycle model that inherits its value from the parent.
-
-    // Some inherited member variables are not set here. This is for two main reasons:
-    // First, some of the new cell-cycle model's member variables (namely mBirthTime, mCurrentCellCyclePhase, mReadyToDivide) will already have been correctly initialized in the new cell-cycle model's constructor. 
-    // Second, the member variable mDimension remains unset, since this cell-cycle model does not need to know the spatial dimension, so if we were to call SetDimension() on the new cell-cycle model an exception would be triggered; 
-    // hence we do not set this member variable. It is also worth noting that in a simulation, one or more of the new cell-cycle model's member variables may be set/overwritten as soon as InitialiseDaughterCell() is called on the new cell-cycle model; 
-    // this occurs when the associated cell has called its Divide() method.
-
-    AbstractCellCycleModel* CreateCellCycleModel()
-    {
-        FixedDurationCellCycleModel* p_model = new FixedDurationCellCycleModel();
-
-        p_model->SetBirthTime(mBirthTime);
-        p_model->SetStemCellG1Duration(mG1Duration);
-        p_model->SetTransitCellG1Duration(mG1Duration);
-        //p_model->SetMinimumGapDuration(3.0);
-        p_model->SetGeneration(mGeneration);
-        p_model->SetMaxTransitGenerations(mMaxTransitGenerations);
-
-        return p_model;
-    }
+    // Override CreateCellCycleModel(): builder method for new copies of the cell-cycle model.
+    AbstractCellCycleModel* CreateCellCycleModel();
 };
 
-// We want to archive (save or load) the cell-cycle model object in a cell-based simulation.
-// We also need this for writing out the parameters file describing the settings for a simulation - 
-// it provides the unique identifier for our new cell-cycle model. 
-// Thus every cell-cycle model class must provide this, or you'll get errors when running simulations.
+// Needed for archiving. Also needed for writing out parameters file with simulation settings
+// because it provides a unique identifier for our custom cell-cycle model. 
+// Every cell-cycle model class must provide this, or simulations will throw errors.
 #include "SerializationExportWrapper.hpp"
-CHASTE_CLASS_EXPORT(FixedDurationCellCycleModel)
-
-// This is the same as above, but  for newer versions of the Boost libraries
-#include "SerializationExportWrapperForCpp.hpp"
 CHASTE_CLASS_EXPORT(FixedDurationCellCycleModel)
 
 #endif /*FIXEDDURATIONCELLCYCLEMODEL_HPP_*/
