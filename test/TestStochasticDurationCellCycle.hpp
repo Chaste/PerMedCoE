@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2005-2021, University of Oxford.
+Copyright (c) 2005-2022, University of Oxford.
 All rights reserved.
 
 University of Oxford means the Chancellor, Masters and Scholars of the
@@ -38,50 +38,48 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cxxtest/TestSuite.h>
 #include "AbstractCellBasedTestSuite.hpp"
+#include "SmartPointers.hpp"
 
 #include "CellsGenerator.hpp"
-#include "WildTypeCellMutationState.hpp"
-#include "TransitCellProliferativeType.hpp"
-#include "HoneycombMeshGenerator.hpp"
-#include "OffLatticeSimulation.hpp"
-#include "SmartPointers.hpp"
-#include "NodesOnlyMesh.hpp"
-#include "NodeBasedCellPopulation.hpp"
 #include "GeneralisedLinearSpringForce.hpp"
+#include "NodeBasedCellPopulation.hpp"
+#include "NodesOnlyMesh.hpp"
+#include "OffLatticeSimulation.hpp"
 #include "SphereGeometryBoundaryCondition.hpp"
-
-#include "StochasticDurationCellCycleModel.hpp"
+#include "TransitCellProliferativeType.hpp"
 
 // Chaste uses PETSc to solve linear algebra problems.
 // PETSc must be started & closed at the start & end of tests.
-// This code will never run in parallel so we use FakePetscSetup.hpp.
+// This code cannot currently run in parallel so we use FakePetscSetup.hpp.
 #include "FakePetscSetup.hpp"
+
+#include "StochasticDurationCellCycleModel.hpp"
 
 class TestStochasticDurationCellCycle : public AbstractCellBasedTestSuite
 {
 public:
     void TestNodeBasedStochasticDurationCellCycle()
     {
-        // We cannot currently run node based simulations in parallel.
+        // Cannot currently run cell-based simulations in parallel.
         EXIT_IF_PARALLEL;
 
         TS_ASSERT_THROWS_NOTHING(StochasticDurationCellCycleModel model);
 
         // Create 3D mesh with a single node
-        // Length is dimensionless; typical cell diameter is approx 10 um
         std::vector<Node<3>*> nodes;
         nodes.push_back(new Node<3>(0u,  false,  0.0, 0.0, 0.1));
         NodesOnlyMesh<3> mesh;
+
+        // Length is dimensionless and based on typical cell diameter i.e. approx 10 um
         mesh.ConstructNodesWithoutMesh(nodes, 1.5); // neighbour interaction radius = 1.5
 
         // Create cell collection
         std::vector<CellPtr> cells;
-        MAKE_PTR(WildTypeCellMutationState, p_state); 
         MAKE_PTR(TransitCellProliferativeType, p_transit_type);
         CellsGenerator<StochasticDurationCellCycleModel, 3> cells_generator; 
         cells_generator.GenerateBasicRandom(cells, mesh.GetNumNodes(), p_transit_type);
 
-        // Create 3D population object to connect mesh and cells
+        // Create 3D population object to connect mesh and cell
         NodeBasedCellPopulation<3> cell_population(mesh, cells);
 
         // Create an OffLatticeSimulation with the population
@@ -99,7 +97,7 @@ public:
 
         // Define boundary sphere
         c_vector<double,3> centre = zero_vector<double>(3);
-        double radius = 6.0; // 60 um
+        double radius = 3.0; // 60 um diameter
         MAKE_PTR_ARGS(SphereGeometryBoundaryCondition<3>, p_boundary_condition, (&cell_population, centre, radius));
         simulator.AddCellPopulationBoundaryCondition(p_boundary_condition);
 

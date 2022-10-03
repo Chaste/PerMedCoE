@@ -33,49 +33,58 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+// #include "CheckpointArchiveTypes.hpp"
 #include "AbstractSimpleGenerationalCellCycleModel.hpp"
+#include "RandomNumberGenerator.hpp"
 
-#include "FixedDurationCellCycleModel.hpp"
+#include "StochasticDurationCellCycleModel.hpp"
 
 template<class Archive>
-void FixedDurationCellCycleModel::serialize(Archive & archive, const unsigned int version)
+void StochasticDurationCellCycleModel::serialize(Archive & archive, const unsigned int version)
 {
     // Archive cell-cycle model using serialization code from AbstractSimpleGenerationalCellCycleModel
     archive & boost::serialization::base_object<AbstractSimpleGenerationalCellCycleModel>(*this);
+    
+    // Archive RandomNumberGenerator singleton.
+    // Must be done carefully: first serialize directly, then via pointer.
+    // This prevents tripping an assertion when a second class instance is created on de-serialization.
+    RandomNumberGenerator* p_gen = RandomNumberGenerator::Instance();
+    archive & *p_gen; // First serialize directly
+    archive & p_gen; // Then serialize via pointer
 }
 
-void FixedDurationCellCycleModel::SetG1Duration()
+void StochasticDurationCellCycleModel::SetG1Duration()
 {
     assert(mpCell != NULL);  // Make sure cell exists
-
-    mG1Duration = 7.0;
-}
-
-void FixedDurationCellCycleModel::SetSDuration()
-{
-    assert(mpCell != NULL);
-
-    mSDuration = 6.0;
-}
-
-void FixedDurationCellCycleModel::SetG2Duration()
-{
-    assert(mpCell != NULL);
-
-    mG2Duration = 3.0;
-}
     
-void FixedDurationCellCycleModel::SetMDuration()
+    mG1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
+}
+
+void StochasticDurationCellCycleModel::SetSDuration()
 {
     assert(mpCell != NULL);
 
-    mMDuration = 2.0;
+    mSDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(6.0, 0.6);
 }
 
-AbstractCellCycleModel* FixedDurationCellCycleModel::CreateCellCycleModel()
+void StochasticDurationCellCycleModel::SetG2Duration()
+{
+    assert(mpCell != NULL);
+
+    mG2Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(3.0, 0.3);
+}
+
+void StochasticDurationCellCycleModel::SetMDuration()
+{
+    assert(mpCell != NULL);
+
+    mMDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(2.0, 0.2);
+}
+
+AbstractCellCycleModel* StochasticDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
-    FixedDurationCellCycleModel* p_model = new FixedDurationCellCycleModel();
+    StochasticDurationCellCycleModel* p_model = new StochasticDurationCellCycleModel();
 
     // Inherits values from parent
     p_model->SetBirthTime(mBirthTime);
@@ -94,4 +103,4 @@ AbstractCellCycleModel* FixedDurationCellCycleModel::CreateCellCycleModel()
 }
 
 #include "SerializationExportWrapperForCpp.hpp"
-CHASTE_CLASS_EXPORT(FixedDurationCellCycleModel)
+CHASTE_CLASS_EXPORT(StochasticDurationCellCycleModel)

@@ -41,12 +41,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SmartPointers.hpp"
 
 #include "CellsGenerator.hpp"
-#include "TransitCellProliferativeType.hpp"
-#include "OffLatticeSimulation.hpp"
-#include "NodesOnlyMesh.hpp"
-#include "NodeBasedCellPopulation.hpp"
 #include "GeneralisedLinearSpringForce.hpp"
+#include "NodeBasedCellPopulation.hpp"
+#include "NodesOnlyMesh.hpp"
+#include "OffLatticeSimulation.hpp"
 #include "SphereGeometryBoundaryCondition.hpp"
+#include "TransitCellProliferativeType.hpp"
 
 // Chaste uses PETSc to solve linear algebra problems.
 // PETSc must be started & closed at the start & end of tests.
