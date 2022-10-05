@@ -79,7 +79,7 @@ public:
         mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
 
         // Create cell cycle model
-        FixedDurationCellCycleModel* p_cell_cycle_model = new FixedDurationCellCycleModel;
+        FixedDurationCellCycleModel* p_cell_cycle_model = new FixedDurationCellCycleModel(7.0, 6.0, 3.0, 2.0);
 
         // Create cell
         MAKE_PTR(WildTypeCellMutationState, p_mutation_state);

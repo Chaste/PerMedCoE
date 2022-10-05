@@ -33,6 +33,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+#include <algorithm>
 #include "AbstractSimpleGenerationalCellCycleModel.hpp"
 
 #include "FixedDurationCellCycleModel.hpp"
@@ -44,33 +45,33 @@ void FixedDurationCellCycleModel::serialize(Archive & archive, const unsigned in
     archive & boost::serialization::base_object<AbstractSimpleGenerationalCellCycleModel>(*this);
 }
 
-FixedDurationCellCycleModel::FixedDurationCellCycleModel()
+FixedDurationCellCycleModel::FixedDurationCellCycleModel(double g1Duration, double sDuration, double g2Duration, double mDuration)
     : AbstractSimpleGenerationalCellCycleModel()
 {
-  SetPhaseDurations();
+  SetPhaseDurations(g1Duration, sDuration, g2Duration, mDuration);
 }
 
-void FixedDurationCellCycleModel::SetPhaseDurations()
+void FixedDurationCellCycleModel::SetPhaseDurations(double g1Duration, double sDuration, double g2Duration, double mDuration)
 {
-    SetStemCellG1Duration(7.0);
-    SetTransitCellG1Duration(7.0);
-    SetSDuration(6.0);
-    SetG2Duration(3.0);
-    SetMDuration(2.0);
-    SetMinimumGapDuration(3.0);
+    SetStemCellG1Duration(g1Duration);
+    SetTransitCellG1Duration(g1Duration);
+    SetSDuration(sDuration);
+    SetG2Duration(g2Duration);
+    SetMDuration(mDuration);
+    SetMinimumGapDuration(std::min(g1Duration, g2Duration));
 }
 
 void FixedDurationCellCycleModel::SetG1Duration()
 {
     assert(mpCell != NULL);  // Make sure cell exists
 
-    mG1Duration = 7.0;
+    mG1Duration = mStemCellG1Duration;
 }
 
 AbstractCellCycleModel* FixedDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
-    FixedDurationCellCycleModel* p_model = new FixedDurationCellCycleModel();
+    FixedDurationCellCycleModel* p_model = new FixedDurationCellCycleModel(GetG1Duration(), GetSDuration(), GetG2Duration(), GetMDuration());
 
     // Inherit values from parent
     p_model->SetBirthTime(mBirthTime);
