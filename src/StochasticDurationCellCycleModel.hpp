@@ -49,10 +49,7 @@ private:
     void serialize(Archive & archive, const unsigned int version);
 
     // Override phase duration methods
-    void SetG1Duration();
-    void SetSDuration();
-    void SetG2Duration();
-    void SetMDuration();
+    void SetG1Duration() override;
 
 public:
     StochasticDurationCellCycleModel() {}
@@ -61,9 +58,9 @@ public:
     AbstractCellCycleModel* CreateCellCycleModel();
 };
 
-// Needed for archiving. Also needed for writing out parameters file with simulation settings
-// because it provides a unique identifier for our custom cell-cycle model. 
-// Every cell-cycle model class must provide this, or simulations will throw errors.
+// Provides a unique identifier for the custom cell-cycle model.
+// Needed for archiving and for writing out parameters file.
+// Simulations will throw errors if missing.
 #include "SerializationExportWrapper.hpp"
 CHASTE_CLASS_EXPORT(StochasticDurationCellCycleModel)
 

@@ -33,6 +33,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+#include <algorithm>
 #include "AbstractSimpleGenerationalCellCycleModel.hpp"
 #include "RandomNumberGenerator.hpp"
 
@@ -59,39 +60,29 @@ void StochasticDurationCellCycleModel::SetG1Duration()
     mG1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
 }
 
-void StochasticDurationCellCycleModel::SetSDuration()
-{
-    assert(mpCell != NULL);
-
-    mSDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(6.0, 0.6);
-}
-
-void StochasticDurationCellCycleModel::SetG2Duration()
-{
-    assert(mpCell != NULL);
-
-    mG2Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(3.0, 0.3);
-}
-
-void StochasticDurationCellCycleModel::SetMDuration()
-{
-    assert(mpCell != NULL);
-
-    mMDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(2.0, 0.2);
-}
-
 AbstractCellCycleModel* StochasticDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
     StochasticDurationCellCycleModel* p_model = new StochasticDurationCellCycleModel();
 
-    // Inherits values from parent
+    // Inherit values from parent
     p_model->SetBirthTime(mBirthTime);
-    p_model->SetStemCellG1Duration(mG1Duration);
-    p_model->SetTransitCellG1Duration(mG1Duration);
-    p_model->SetMinimumGapDuration(mMinimumGapDuration);
     p_model->SetGeneration(mGeneration);
     p_model->SetMaxTransitGenerations(mMaxTransitGenerations);
+
+    // Set phase durations
+    double g1Duration = p_model->GetG1Duration();
+    p_model->SetStemCellG1Duration(g1Duration);
+    p_model->SetTransitCellG1Duration(g1Duration);
+
+    double sDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(6.0, 0.6);
+    double g2Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(3.0, 0.3);
+    double mDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(2.0, 0.2);
+    p_model->SetSDuration(sDuration);
+    p_model->SetG2Duration(g2Duration);
+    p_model->SetMDuration(mDuration);
+    
+    p_model->SetMinimumGapDuration(std::min(g1Duration, g2Duration));
 
     // Notes:
     // Already initialized in constructor: mBirthTime, mCurrentCellCyclePhase, mReadyToDivide.

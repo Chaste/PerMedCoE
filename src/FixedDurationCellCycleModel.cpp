@@ -51,39 +51,23 @@ void FixedDurationCellCycleModel::SetG1Duration()
     mG1Duration = 7.0;
 }
 
-void FixedDurationCellCycleModel::SetSDuration()
-{
-    assert(mpCell != NULL);
-
-    mSDuration = 6.0;
-}
-
-void FixedDurationCellCycleModel::SetG2Duration()
-{
-    assert(mpCell != NULL);
-
-    mG2Duration = 3.0;
-}
-    
-void FixedDurationCellCycleModel::SetMDuration()
-{
-    assert(mpCell != NULL);
-
-    mMDuration = 2.0;
-}
-
 AbstractCellCycleModel* FixedDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
     FixedDurationCellCycleModel* p_model = new FixedDurationCellCycleModel();
 
-    // Inherits values from parent
+    // Inherit values from parent
     p_model->SetBirthTime(mBirthTime);
-    p_model->SetStemCellG1Duration(mG1Duration);
-    p_model->SetTransitCellG1Duration(mG1Duration);
-    p_model->SetMinimumGapDuration(mMinimumGapDuration);
     p_model->SetGeneration(mGeneration);
     p_model->SetMaxTransitGenerations(mMaxTransitGenerations);
+
+    // Set phase durations
+    p_model->SetStemCellG1Duration(7.0);
+    p_model->SetTransitCellG1Duration(7.0);
+    p_model->SetSDuration(6.0);
+    p_model->SetG2Duration(3.0);
+    p_model->SetMDuration(2.0);
+    p_model->SetMinimumGapDuration(3.0);
 
     // Notes:
     // Already initialized in constructor: mBirthTime, mCurrentCellCyclePhase, mReadyToDivide.
