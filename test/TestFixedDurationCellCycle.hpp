@@ -48,9 +48,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SphereGeometryBoundaryCondition.hpp"
 #include "TransitCellProliferativeType.hpp"
 
-// Chaste uses PETSc to solve linear algebra problems.
-// PETSc must be started & closed at the start & end of tests.
-// This code cannot currently run in parallel so we use FakePetscSetup.hpp.
+#include "CellIdWriter.hpp"
+#include "CellLabelWriter.hpp"
+#include "CellVolumesWriter.hpp"
+
+// PETSc must be initialized to solve linear algebra problems in Chaste.
+// For sequential code, FakePetscSetup.hpp starts PETSc on a single rank.
 #include "FakePetscSetup.hpp"
 
 #include "FixedDurationCellCycleModel.hpp"
@@ -65,13 +68,14 @@ public:
 
         TS_ASSERT_THROWS_NOTHING(FixedDurationCellCycleModel model);
 
-        // Create 3D mesh with a single node
+        // Create 3D NodesOnlyMesh with a single node
         std::vector<Node<3>*> nodes;
         nodes.push_back(new Node<3>(0u,  false,  0.0, 0.0, 0.1));
         NodesOnlyMesh<3> mesh;
 
         // Length is dimensionless and based on typical cell diameter i.e. approx 10 um
-        mesh.ConstructNodesWithoutMesh(nodes, 1.5); // neighbour interaction radius = 1.5
+        double max_interaction_radius = 1.5; // 15 um neighbour interaction distance
+        mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
 
         // Create cell collection
         std::vector<CellPtr> cells;
@@ -79,8 +83,13 @@ public:
         CellsGenerator<FixedDurationCellCycleModel, 3> cells_generator; 
         cells_generator.GenerateBasicRandom(cells, mesh.GetNumNodes(), p_transit_type);
 
-        // Create 3D population object to connect mesh and cell
+        // Create 3D cell population object to connect mesh and cell
         NodeBasedCellPopulation<3> cell_population(mesh, cells);
+
+        // Add output writers
+        cell_population.AddCellWriter<CellIdWriter>();
+        cell_population.AddCellWriter<CellLabelWriter>();
+        cell_population.AddCellWriter<CellVolumesWriter>();
 
         // Create an OffLatticeSimulation with the population
         OffLatticeSimulation<3> simulator(cell_population);
@@ -102,6 +111,7 @@ public:
         simulator.AddCellPopulationBoundaryCondition(p_boundary_condition);
 
         // Run the simulation
+        cell_population.Update(false); // Needed for CellVolumesWriter, else throws
         simulator.Solve();
         
         // Memory management
