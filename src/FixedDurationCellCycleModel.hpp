@@ -48,14 +48,14 @@ private:
     template<class Archive>
     void serialize(Archive & archive, const unsigned int version);
 
-    // Override phase duration methods
+    // Override G1 phase duration method
     void SetG1Duration() override;
 
 public:
     FixedDurationCellCycleModel() {}
 
-    // Override CreateCellCycleModel(): builder method for new copies of the cell-cycle model.
-    AbstractCellCycleModel* CreateCellCycleModel();
+    // Override builder method for new copies of the cell-cycle model.
+    AbstractCellCycleModel* CreateCellCycleModel() override;
 };
 
 // Provides a unique identifier for the custom cell-cycle model.

@@ -46,7 +46,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NodesOnlyMesh.hpp"
 #include "OffLatticeSimulation.hpp"
 #include "SphereGeometryBoundaryCondition.hpp"
-#include "TransitCellProliferativeType.hpp"
+#include "StemCellProliferativeType.hpp"
 
 #include "CellIdWriter.hpp"
 #include "CellLabelWriter.hpp"
@@ -77,13 +77,37 @@ public:
         double max_interaction_radius = 1.5; // 15 um neighbour interaction distance
         mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
 
-        // Create cell collection
-        std::vector<CellPtr> cells;
-        MAKE_PTR(TransitCellProliferativeType, p_transit_type);
-        CellsGenerator<StochasticDurationCellCycleModel, 3> cells_generator; 
-        cells_generator.GenerateBasicRandom(cells, mesh.GetNumNodes(), p_transit_type);
+        // Create cell cycle model
+        StochasticDurationCellCycleModel* p_cell_cycle_model = new StochasticDurationCellCycleModel;
+        double g1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
+        double sDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(6.0, 0.6);
+        double g2Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(3.0, 0.3);
+        double mDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(2.0, 0.2);
+        p_cell_cycle_model->SetStemCellG1Duration(g1Duration);
+        p_cell_cycle_model->SetTransitCellG1Duration(g1Duration);
+        p_cell_cycle_model->SetSDuration(sDuration);
+        p_cell_cycle_model->SetG2Duration(g2Duration);
+        p_cell_cycle_model->SetMDuration(mDuration);
+
+        // Create cell
+        MAKE_PTR(WildTypeCellMutationState, p_mutation_state);
+        MAKE_PTR(StemCellProliferativeType, p_proliferative_type);
+        CellPtr p_cell(new Cell(p_mutation_state, p_cell_cycle_model));
+        p_cell->SetCellProliferativeType(p_proliferative_type);
+        p_cell->InitialiseCellCycleModel();
+
+        // Verify phase durations
+        p_cell_cycle_model = static_cast<StochasticDurationCellCycleModel*>(p_cell->GetCellCycleModel());
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetG1Duration(), 7.0, 4*0.7);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetStemCellG1Duration(), 7.0, 4*0.7);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetTransitCellG1Duration(), 7.0, 4*0.7);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetSDuration(), 6.0, 4*0.6);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetG2Duration(), 3.0, 4*0.3);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetMDuration(), 2.0, 4*0.2);
 
         // Create 3D cell population object to connect mesh and cell
+        std::vector<CellPtr> cells;
+        cells.push_back(p_cell);
         NodeBasedCellPopulation<3> cell_population(mesh, cells);
 
         // Add output writers

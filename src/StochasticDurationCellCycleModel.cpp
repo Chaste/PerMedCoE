@@ -57,7 +57,7 @@ void StochasticDurationCellCycleModel::SetG1Duration()
 {
     assert(mpCell != NULL);  // Make sure cell exists
     
-    mG1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
+    mG1Duration = mStemCellG1Duration;
 }
 
 AbstractCellCycleModel* StochasticDurationCellCycleModel::CreateCellCycleModel()
@@ -71,7 +71,7 @@ AbstractCellCycleModel* StochasticDurationCellCycleModel::CreateCellCycleModel()
     p_model->SetMaxTransitGenerations(mMaxTransitGenerations);
 
     // Set phase durations
-    double g1Duration = p_model->GetG1Duration();
+    double g1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
     p_model->SetStemCellG1Duration(g1Duration);
     p_model->SetTransitCellG1Duration(g1Duration);
 
