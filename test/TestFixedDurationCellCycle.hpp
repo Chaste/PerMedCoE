@@ -41,7 +41,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SmartPointers.hpp"
 
 #include "CellsGenerator.hpp"
-#include "GeneralisedLinearSpringForce.hpp"
+// #include "GeneralisedLinearSpringForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "NodesOnlyMesh.hpp"
 #include "OffLatticeSimulation.hpp"
@@ -113,12 +113,8 @@ public:
         // Set some simulation options
         simulator.SetOutputDirectory("FixedDurationCellCycle");
         simulator.SetEndTime(48.0); // 48 hours
-        simulator.SetDt(1.0 / 60.0); // 1 min (6 min throws errors - cells moving too fast)
-        simulator.SetSamplingTimestepMultiple(6); // 6 mins
-
-        // Add force for cell movement
-        MAKE_PTR(GeneralisedLinearSpringForce<3>, p_force);
-        simulator.AddForce(p_force);
+        simulator.SetDt(1.0 / 6.0); // 6 mins (reduce if cells move else will throw)
+        simulator.SetSamplingTimestepMultiple(1); // 6 mins
 
         // Define boundary sphere
         c_vector<double,3> centre = zero_vector<double>(3);
