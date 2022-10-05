@@ -48,11 +48,11 @@ private:
     template<class Archive>
     void serialize(Archive & archive, const unsigned int version);
 
-    void SetPhaseDurations(double g1Duration, double sDuration, double g2Duration, double mDuration);
+    void SetPhaseDurations();
     void SetG1Duration() override;
 
 public:
-    FixedDurationCellCycleModel(double g1Duration=7.0, double sDuration=6.0, double g2Duration=3.0, double mDuration=2.0);
+    FixedDurationCellCycleModel();
 
     // Override builder method for new copies of the cell-cycle model.
     AbstractCellCycleModel* CreateCellCycleModel() override;

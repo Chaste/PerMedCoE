@@ -89,12 +89,12 @@ public:
 
         // Verify phase durations
         p_cell_cycle_model = static_cast<StochasticDurationCellCycleModel*>(p_cell->GetCellCycleModel());
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetG1Duration(), 7.0, 4*0.7);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetStemCellG1Duration(), 7.0, 4*0.7);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetTransitCellG1Duration(), 7.0, 4*0.7);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetSDuration(), 6.0, 4*0.6);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetG2Duration(), 3.0, 4*0.3);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetMDuration(), 2.0, 4*0.2);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetG1Duration(), 7.0, 4.0 * 0.7);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetStemCellG1Duration(), 7.0, 4.0 * 0.7);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetTransitCellG1Duration(), 7.0, 4.0 * 0.7);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetSDuration(), 6.0, 4.0 * 0.6);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetG2Duration(), 3.0, 4.0 * 0.3);
+        TS_ASSERT_DELTA(p_cell_cycle_model->GetMDuration(), 2.0, 4.0 * 0.2);
 
         // Create 3D cell population object to connect mesh and cell
         std::vector<CellPtr> cells;
@@ -112,7 +112,7 @@ public:
         // Set some simulation options
         simulator.SetOutputDirectory("StochasticDurationCellCycle");
         simulator.SetEndTime(48.0); // 48 hours
-        simulator.SetDt(1.0 / 60.0); // 1 min
+        simulator.SetDt(1.0 / 60.0); // 1 min (6 min throws errors - cells moving too fast)
         simulator.SetSamplingTimestepMultiple(6); // 6 mins
 
         // Add force for cell movement

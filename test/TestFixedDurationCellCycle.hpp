@@ -79,7 +79,7 @@ public:
         mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
 
         // Create cell cycle model
-        FixedDurationCellCycleModel* p_cell_cycle_model = new FixedDurationCellCycleModel(7.0, 6.0, 3.0, 2.0);
+        FixedDurationCellCycleModel* p_cell_cycle_model = new FixedDurationCellCycleModel;
 
         // Create cell
         MAKE_PTR(WildTypeCellMutationState, p_mutation_state);
@@ -113,7 +113,7 @@ public:
         // Set some simulation options
         simulator.SetOutputDirectory("FixedDurationCellCycle");
         simulator.SetEndTime(48.0); // 48 hours
-        simulator.SetDt(1.0 / 60.0); // 1 min
+        simulator.SetDt(1.0 / 60.0); // 1 min (6 min throws errors - cells moving too fast)
         simulator.SetSamplingTimestepMultiple(6); // 6 mins
 
         // Add force for cell movement
