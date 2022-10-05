@@ -44,6 +44,22 @@ void FixedDurationCellCycleModel::serialize(Archive & archive, const unsigned in
     archive & boost::serialization::base_object<AbstractSimpleGenerationalCellCycleModel>(*this);
 }
 
+FixedDurationCellCycleModel::FixedDurationCellCycleModel()
+    : AbstractSimpleGenerationalCellCycleModel()
+{
+  SetPhaseDurations();
+}
+
+void FixedDurationCellCycleModel::SetPhaseDurations()
+{
+    SetStemCellG1Duration(7.0);
+    SetTransitCellG1Duration(7.0);
+    SetSDuration(6.0);
+    SetG2Duration(3.0);
+    SetMDuration(2.0);
+    SetMinimumGapDuration(3.0);
+}
+
 void FixedDurationCellCycleModel::SetG1Duration()
 {
     assert(mpCell != NULL);  // Make sure cell exists
@@ -60,20 +76,6 @@ AbstractCellCycleModel* FixedDurationCellCycleModel::CreateCellCycleModel()
     p_model->SetBirthTime(mBirthTime);
     p_model->SetGeneration(mGeneration);
     p_model->SetMaxTransitGenerations(mMaxTransitGenerations);
-
-    // Set phase durations
-    p_model->SetStemCellG1Duration(7.0);
-    p_model->SetTransitCellG1Duration(7.0);
-    p_model->SetSDuration(6.0);
-    p_model->SetG2Duration(3.0);
-    p_model->SetMDuration(2.0);
-    p_model->SetMinimumGapDuration(3.0);
-
-    // Notes:
-    // Already initialized in constructor: mBirthTime, mCurrentCellCyclePhase, mReadyToDivide.
-    // Not set: mDimension. Spatial dimension not required. SetDimension() will trigger exception. 
-    // InitialiseDaughterCell() can set/overwrite member variables e.g. called from Divide().
-
     return p_model;
 }
 

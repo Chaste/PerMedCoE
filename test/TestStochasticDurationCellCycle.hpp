@@ -79,15 +79,6 @@ public:
 
         // Create cell cycle model
         StochasticDurationCellCycleModel* p_cell_cycle_model = new StochasticDurationCellCycleModel;
-        double g1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
-        double sDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(6.0, 0.6);
-        double g2Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(3.0, 0.3);
-        double mDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(2.0, 0.2);
-        p_cell_cycle_model->SetStemCellG1Duration(g1Duration);
-        p_cell_cycle_model->SetTransitCellG1Duration(g1Duration);
-        p_cell_cycle_model->SetSDuration(sDuration);
-        p_cell_cycle_model->SetG2Duration(g2Duration);
-        p_cell_cycle_model->SetMDuration(mDuration);
 
         // Create cell
         MAKE_PTR(WildTypeCellMutationState, p_mutation_state);

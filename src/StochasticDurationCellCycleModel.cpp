@@ -53,6 +53,27 @@ void StochasticDurationCellCycleModel::serialize(Archive & archive, const unsign
     archive & p_gen; // Then serialize via pointer
 }
 
+StochasticDurationCellCycleModel::StochasticDurationCellCycleModel()
+    : AbstractSimpleGenerationalCellCycleModel()
+{
+  SetPhaseDurations();
+}
+
+void StochasticDurationCellCycleModel::SetPhaseDurations()
+{
+    double g1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
+    double sDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(6.0, 0.6);
+    double g2Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(3.0, 0.3);
+    double mDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(2.0, 0.2);
+
+    SetStemCellG1Duration(g1Duration);
+    SetTransitCellG1Duration(g1Duration);
+    SetSDuration(sDuration);
+    SetG2Duration(g2Duration);
+    SetMDuration(mDuration);
+    SetMinimumGapDuration(std::min(g1Duration, g2Duration));
+}
+
 void StochasticDurationCellCycleModel::SetG1Duration()
 {
     assert(mpCell != NULL);  // Make sure cell exists
@@ -69,26 +90,6 @@ AbstractCellCycleModel* StochasticDurationCellCycleModel::CreateCellCycleModel()
     p_model->SetBirthTime(mBirthTime);
     p_model->SetGeneration(mGeneration);
     p_model->SetMaxTransitGenerations(mMaxTransitGenerations);
-
-    // Set phase durations
-    double g1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
-    p_model->SetStemCellG1Duration(g1Duration);
-    p_model->SetTransitCellG1Duration(g1Duration);
-
-    double sDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(6.0, 0.6);
-    double g2Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(3.0, 0.3);
-    double mDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(2.0, 0.2);
-    p_model->SetSDuration(sDuration);
-    p_model->SetG2Duration(g2Duration);
-    p_model->SetMDuration(mDuration);
-    
-    p_model->SetMinimumGapDuration(std::min(g1Duration, g2Duration));
-
-    // Notes:
-    // Already initialized in constructor: mBirthTime, mCurrentCellCyclePhase, mReadyToDivide.
-    // Not set: mDimension. Spatial dimension not required. SetDimension() will trigger exception. 
-    // InitialiseDaughterCell() can set/overwrite member variables e.g. called from Divide().
-
     return p_model;
 }
 

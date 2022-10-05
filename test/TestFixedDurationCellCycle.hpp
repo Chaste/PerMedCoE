@@ -80,11 +80,6 @@ public:
 
         // Create cell cycle model
         FixedDurationCellCycleModel* p_cell_cycle_model = new FixedDurationCellCycleModel;
-        p_cell_cycle_model->SetStemCellG1Duration(7.0);
-        p_cell_cycle_model->SetTransitCellG1Duration(7.0);
-        p_cell_cycle_model->SetSDuration(6.0);
-        p_cell_cycle_model->SetG2Duration(3.0);
-        p_cell_cycle_model->SetMDuration(2.0);
 
         // Create cell
         MAKE_PTR(WildTypeCellMutationState, p_mutation_state);
