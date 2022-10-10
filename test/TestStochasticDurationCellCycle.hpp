@@ -50,6 +50,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CellIdWriter.hpp"
 #include "CellLabelWriter.hpp"
 #include "CellVolumesWriter.hpp"
+#include "VolumeTrackingModifier.hpp"
 
 // PETSc must be initialized to solve linear algebra problems in Chaste.
 // For sequential code, FakePetscSetup.hpp starts PETSc on a single rank.
@@ -119,6 +120,10 @@ public:
         double radius = 3.0; // 60 um diameter
         MAKE_PTR_ARGS(SphereGeometryBoundaryCondition<3>, p_boundary_condition, (&cell_population, centre, radius));
         simulator.AddCellPopulationBoundaryCondition(p_boundary_condition);
+
+        // Add cell volume tracking modifier
+        MAKE_PTR(VolumeTrackingModifier<3>, p_modifier);
+        simulator.AddSimulationModifier(p_modifier);
 
         // Run the simulation
         cell_population.Update(false); // Needed for CellVolumesWriter, else throws
