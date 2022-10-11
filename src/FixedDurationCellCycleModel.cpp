@@ -33,19 +33,19 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "AbstractSimpleGenerationalCellCycleModel.hpp"
+#include "AbstractSimplePhaseBasedCellCycleModel.hpp"
 
 #include "FixedDurationCellCycleModel.hpp"
 
 template<class Archive>
 void FixedDurationCellCycleModel::serialize(Archive & archive, const unsigned int version)
 {
-    // Archive cell-cycle model using serialization code from AbstractSimpleGenerationalCellCycleModel
-    archive & boost::serialization::base_object<AbstractSimpleGenerationalCellCycleModel>(*this);
+    // Archive cell-cycle model using serialization code from AbstractSimplePhaseBasedCellCycleModel
+    archive & boost::serialization::base_object<AbstractSimplePhaseBasedCellCycleModel>(*this);
 }
 
 FixedDurationCellCycleModel::FixedDurationCellCycleModel()
-    : AbstractSimpleGenerationalCellCycleModel()
+    : AbstractSimplePhaseBasedCellCycleModel()
 {
   SetPhaseDurations();
 }
@@ -71,11 +71,6 @@ AbstractCellCycleModel* FixedDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
     FixedDurationCellCycleModel* p_model = new FixedDurationCellCycleModel();
-
-    // Inherit values from parent
-    p_model->SetBirthTime(mBirthTime);
-    p_model->SetGeneration(mGeneration);
-    p_model->SetMaxTransitGenerations(mMaxTransitGenerations);
     return p_model;
 }
 

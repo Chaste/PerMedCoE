@@ -34,7 +34,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <algorithm>
-#include "AbstractSimpleGenerationalCellCycleModel.hpp"
+#include "AbstractSimplePhaseBasedCellCycleModel.hpp"
 #include "RandomNumberGenerator.hpp"
 
 #include "StochasticDurationCellCycleModel.hpp"
@@ -42,8 +42,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template<class Archive>
 void StochasticDurationCellCycleModel::serialize(Archive & archive, const unsigned int version)
 {
-    // Archive cell-cycle model using serialization code from AbstractSimpleGenerationalCellCycleModel
-    archive & boost::serialization::base_object<AbstractSimpleGenerationalCellCycleModel>(*this);
+    // Archive cell-cycle model using serialization code from AbstractSimplePhaseBasedCellCycleModel
+    archive & boost::serialization::base_object<AbstractSimplePhaseBasedCellCycleModel>(*this);
     
     // Archive RandomNumberGenerator singleton.
     // Must be done carefully: first serialize directly, then via pointer.
@@ -54,7 +54,7 @@ void StochasticDurationCellCycleModel::serialize(Archive & archive, const unsign
 }
 
 StochasticDurationCellCycleModel::StochasticDurationCellCycleModel()
-    : AbstractSimpleGenerationalCellCycleModel()
+    : AbstractSimplePhaseBasedCellCycleModel()
 {
   SetPhaseDurations();
 }
@@ -85,11 +85,6 @@ AbstractCellCycleModel* StochasticDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
     StochasticDurationCellCycleModel* p_model = new StochasticDurationCellCycleModel();
-
-    // Inherit values from parent
-    p_model->SetBirthTime(mBirthTime);
-    p_model->SetGeneration(mGeneration);
-    p_model->SetMaxTransitGenerations(mMaxTransitGenerations);
     return p_model;
 }
 

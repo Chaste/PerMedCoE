@@ -36,11 +36,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FIXEDDURATIONCELLCYCLEMODEL_HPP_
 #define FIXEDDURATIONCELLCYCLEMODEL_HPP_
 
-#include "AbstractSimpleGenerationalCellCycleModel.hpp"
+#include "AbstractSimplePhaseBasedCellCycleModel.hpp"
 
-// "Simple" cell-cycle model: phase durations are determined when the cell-cycle model is created.
-// "Generational" cell-cycle model: tracks generation of corresponding cell and sets cell type accordingly.
-class FixedDurationCellCycleModel : public AbstractSimpleGenerationalCellCycleModel
+// "Simple" cell-cycle model: phase durations are set when the model is created.
+class FixedDurationCellCycleModel : public AbstractSimplePhaseBasedCellCycleModel
 {
 private:
     // For archiving (saving or loading) the cell-cycle model object in a cell-based simulation. 
