@@ -42,6 +42,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Cell.hpp"
 #include "CellsGenerator.hpp"
+#include "GeneralisedLinearSpringForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "NodesOnlyMesh.hpp"
 #include "OffLatticeSimulation.hpp"
@@ -114,14 +115,18 @@ public:
         // Set some simulation options
         simulator.SetOutputDirectory("FixedDurationCellCycle");
         simulator.SetEndTime(48.0); // 48 hours
-        simulator.SetDt(1.0 / 6.0); // 6 mins (reduce if cells move else will throw)
-        simulator.SetSamplingTimestepMultiple(1); // 6 mins
+        simulator.SetDt(1.0 / 60.0); // 1 min (6 mins throws error if cells are moving)
+        simulator.SetSamplingTimestepMultiple(6); // 6 mins
 
         // Define boundary sphere
         c_vector<double,3> centre = zero_vector<double>(3);
         double radius = 3.0; // 60 um diameter
         MAKE_PTR_ARGS(SphereGeometryBoundaryCondition<3>, p_boundary_condition, (&cell_population, centre, radius));
         simulator.AddCellPopulationBoundaryCondition(p_boundary_condition);
+
+        // Add force for cell movement
+         MAKE_PTR(GeneralisedLinearSpringForce<3>, p_force);
+         simulator.AddForce(p_force);
 
         // Add cell volume tracking modifier
         MAKE_PTR(VolumeTrackingModifier<3>, p_modifier);
