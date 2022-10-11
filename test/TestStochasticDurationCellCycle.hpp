@@ -40,6 +40,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractCellBasedTestSuite.hpp"
 #include "SmartPointers.hpp"
 
+#include "Cell.hpp"
 #include "CellsGenerator.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "NodesOnlyMesh.hpp"
@@ -126,7 +127,7 @@ public:
         simulator.AddSimulationModifier(p_modifier);
 
         // Run the simulation
-        cell_population.Update(false); // Needed for CellVolumesWriter, else throws
+        cell_population.Update(true); // Needed for CellVolumesWriter, else throws
         simulator.Solve();
         
         // Memory management

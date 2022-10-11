@@ -40,8 +40,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractCellBasedTestSuite.hpp"
 #include "SmartPointers.hpp"
 
+#include "Cell.hpp"
 #include "CellsGenerator.hpp"
-// #include "GeneralisedLinearSpringForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "NodesOnlyMesh.hpp"
 #include "OffLatticeSimulation.hpp"
@@ -85,7 +85,7 @@ public:
         // Create cell
         MAKE_PTR(WildTypeCellMutationState, p_mutation_state);
         MAKE_PTR(StemCellProliferativeType, p_proliferative_type);
-        CellPtr p_cell(new Cell(p_mutation_state, p_cell_cycle_model));
+        MAKE_PTR_ARGS(Cell, p_cell, (p_mutation_state, p_cell_cycle_model));
         p_cell->SetCellProliferativeType(p_proliferative_type);
         p_cell->InitialiseCellCycleModel();
 
@@ -128,7 +128,7 @@ public:
         simulator.AddSimulationModifier(p_modifier);
 
         // Run the simulation
-        cell_population.Update(false); // Needed for CellVolumesWriter, else throws
+        cell_population.Update(true); // Needed for CellVolumesWriter, else throws
         simulator.Solve();
         
         // Memory management
