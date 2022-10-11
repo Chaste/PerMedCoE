@@ -42,7 +42,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Cell.hpp"
 #include "CellsGenerator.hpp"
-#include "GeneralisedLinearSpringForce.hpp"
+#include "RepulsionForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "NodesOnlyMesh.hpp"
 #include "OffLatticeSimulation.hpp"
@@ -124,7 +124,7 @@ public:
         simulator.AddCellPopulationBoundaryCondition(p_boundary_condition);
 
         // Add force for cell movement
-         MAKE_PTR(GeneralisedLinearSpringForce<3>, p_force);
+         MAKE_PTR(RepulsionForce<3>, p_force);
          simulator.AddForce(p_force);
 
         // Add cell volume tracking modifier
