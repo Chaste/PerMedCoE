@@ -43,9 +43,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
  * A modifier class which at each simulation time step updates the 
- * radius and volume of each cell based on the target area and stores
- * the values in the CellData property. To be used in conjunction with
- * a target area modifier.
+ * radius of each cell based on the target area and stores
+ * the values in the CellData property.
+ * To be used together with a target area modifier.
  */
 template<unsigned DIM>
 class GrowthModifier : public AbstractCellBasedSimulationModifier<DIM,DIM>
