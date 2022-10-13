@@ -81,6 +81,12 @@ void StochasticDurationCellCycleModel::SetG1Duration()
     mG1Duration = mStemCellG1Duration;
 }
 
+void StochasticDurationCellCycleModel::ResetPhaseDurations()
+{
+    SetPhaseDurations();
+    SetG1Duration();
+}
+
 AbstractCellCycleModel* StochasticDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
