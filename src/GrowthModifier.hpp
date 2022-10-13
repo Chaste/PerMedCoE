@@ -42,9 +42,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractCellBasedSimulationModifier.hpp"
 
 /**
- * A modifier class which at each simulation time step calculates the volume of each cell
- * and stores it in in the CellData property as "volume". To be used in conjunction with
- * contact inhibition cell cycle models.
+ * A modifier class which at each simulation time step updates the 
+ * radius and volume of each cell based on the target area and stores
+ * the values in the CellData property. To be used in conjunction with
+ * a target area modifier.
  */
 template<unsigned DIM>
 class GrowthModifier : public AbstractCellBasedSimulationModifier<DIM,DIM>
@@ -83,7 +84,7 @@ public:
      *
      * @param rCellPopulation reference to the cell population
      */
-    virtual void UpdateAtEndOfTimeStep(AbstractCellPopulation<DIM,DIM>& rCellPopulation);
+    virtual void UpdateAtEndOfTimeStep(AbstractCellPopulation<DIM,DIM>& rCellPopulation) override;
 
     /**
      * Overridden SetupSolve() method.
@@ -93,7 +94,7 @@ public:
      * @param rCellPopulation reference to the cell population
      * @param outputDirectory the output directory, relative to where Chaste output is stored
      */
-    virtual void SetupSolve(AbstractCellPopulation<DIM,DIM>& rCellPopulation, std::string outputDirectory);
+    virtual void SetupSolve(AbstractCellPopulation<DIM,DIM>& rCellPopulation, std::string outputDirectory) override;
 
     /**
      * Helper method to compute the volume of each cell in the population and store these in the CellData.
@@ -108,7 +109,7 @@ public:
      *
      * @param rParamsFile the file stream to which the parameters are output
      */
-    void OutputSimulationModifierParameters(out_stream& rParamsFile);
+    void OutputSimulationModifierParameters(out_stream& rParamsFile) override;
 };
 
 #include "SerializationExportWrapper.hpp"
