@@ -34,7 +34,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <algorithm>
+
 #include "AbstractSimplePhaseBasedCellCycleModel.hpp"
+#include "CellCyclePhases.hpp"
+#include "DifferentiatedCellProliferativeType.hpp"
 #include "RandomNumberGenerator.hpp"
 
 #include "StochasticDurationCellCycleModel.hpp"
@@ -81,17 +84,44 @@ void StochasticDurationCellCycleModel::SetG1Duration()
     mG1Duration = mStemCellG1Duration;
 }
 
-void StochasticDurationCellCycleModel::ResetPhaseDurations()
-{
-    SetPhaseDurations();
-    SetG1Duration();
-}
-
 AbstractCellCycleModel* StochasticDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
     StochasticDurationCellCycleModel* p_model = new StochasticDurationCellCycleModel();
     return p_model;
+}
+
+void StochasticDurationCellCycleModel::UpdateCellCyclePhase()
+{
+    double time_since_birth = GetAge();
+    assert(time_since_birth >= 0);
+
+    if (mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
+    {
+        mCurrentCellCyclePhase = G_ZERO_PHASE;
+    }
+    else if (time_since_birth < GetG1Duration())
+    { 
+        // Reset phase durations after each cycle
+        if (GetCurrentCellCyclePhase() == M_PHASE)
+        {
+            SetPhaseDurations();
+            SetG1Duration();
+        }
+        mCurrentCellCyclePhase = G_ONE_PHASE;
+    }
+    else if (time_since_birth <  GetG1Duration() + GetSDuration())
+    {
+        mCurrentCellCyclePhase = S_PHASE;
+    }
+    else if (time_since_birth < GetG1Duration() + GetSDuration() + GetG2Duration())
+    {
+        mCurrentCellCyclePhase = G_TWO_PHASE;
+    }
+    else if (time_since_birth < GetG1Duration() + GetSDuration() + GetG2Duration() + GetMDuration())
+    {
+        mCurrentCellCyclePhase = M_PHASE;
+    }
 }
 
 #include "SerializationExportWrapperForCpp.hpp"
