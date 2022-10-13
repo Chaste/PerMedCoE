@@ -55,6 +55,9 @@ public:
 
     // Override builder method for new copies of the cell-cycle model.
     AbstractCellCycleModel* CreateCellCycleModel() override;
+    
+    // Override to start phase from G1
+    void UpdateCellCyclePhase() override;
 };
 
 // Provides a unique identifier for the custom cell-cycle model.

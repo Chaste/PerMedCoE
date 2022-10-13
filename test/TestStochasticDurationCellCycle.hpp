@@ -53,7 +53,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CellCycleWriter.hpp"
 #include "GrowthModifier.hpp"
-#include "StochasticDurationModifier.hpp"
 
 // PETSc must be initialized to solve linear algebra problems in Chaste.
 // For sequential code, FakePetscSetup.hpp starts PETSc on a single rank.
@@ -129,14 +128,11 @@ public:
          simulator.AddForce(p_force);
 
         // Add simulation modifiers
-        MAKE_PTR(SimpleTargetAreaModifier<3>, p_target_area_modifier);
+        MAKE_PTR(SimpleTargetAreaModifier<3>, p_target_area_modifier); // calculates target area
         simulator.AddSimulationModifier(p_target_area_modifier);
 
-        MAKE_PTR(GrowthModifier<3>, p_growth_modifier);
+        MAKE_PTR(GrowthModifier<3>, p_growth_modifier); // records volume, sizes radii proportional to target area
         simulator.AddSimulationModifier(p_growth_modifier);
-
-        MAKE_PTR(StochasticDurationModifier<3>, p_duration_modifier);
-        simulator.AddSimulationModifier(p_duration_modifier);
 
         // Run the simulation
         simulator.Solve();
