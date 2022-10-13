@@ -69,6 +69,15 @@ void GrowthModifier<DIM>::UpdateCellData(AbstractCellPopulation<DIM,DIM>& rCellP
 {
     rCellPopulation.Update(); // Make sure the cell population is updated
 
+    // Get volume for each cell
+    for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
+         cell_iter != rCellPopulation.End();
+         ++cell_iter)
+    {
+        double cell_volume = rCellPopulation.GetVolumeOfCell(*cell_iter);
+        cell_iter->GetCellData()->SetItem("volume", cell_volume);
+    }
+
     // Set target radius for each cell
     for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
@@ -87,15 +96,6 @@ void GrowthModifier<DIM>::UpdateCellData(AbstractCellPopulation<DIM,DIM>& rCellP
     }
 
     rCellPopulation.Update(); // Update node radii from cell radii
-    
-    // Get new volume for each cell
-    for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-         cell_iter != rCellPopulation.End();
-         ++cell_iter)
-    {
-        double cell_volume = rCellPopulation.GetVolumeOfCell(*cell_iter);
-        cell_iter->GetCellData()->SetItem("volume", cell_volume);
-    }
 }
 
 template<unsigned DIM>
