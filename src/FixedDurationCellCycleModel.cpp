@@ -71,32 +71,32 @@ void FixedDurationCellCycleModel::SetG1Duration()
 AbstractCellCycleModel* FixedDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
-    FixedDurationCellCycleModel* p_model = new FixedDurationCellCycleModel();
-    return p_model;
+    FixedDurationCellCycleModel* pCellCycleModel = new FixedDurationCellCycleModel();
+    return pCellCycleModel;
 }
 
 void FixedDurationCellCycleModel::UpdateCellCyclePhase()
 {
-    double time_since_birth = GetAge();
-    assert(time_since_birth >= 0);
+    double timeSinceBirth = GetAge();
+    assert(timeSinceBirth >= 0);
 
     if (mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
     {
         mCurrentCellCyclePhase = G_ZERO_PHASE;
     }
-    else if (time_since_birth < GetG1Duration())
+    else if (timeSinceBirth < GetG1Duration())
     {
         mCurrentCellCyclePhase = G_ONE_PHASE;
     }
-    else if (time_since_birth <  GetG1Duration() + GetSDuration())
+    else if (timeSinceBirth <  GetG1Duration() + GetSDuration())
     {
         mCurrentCellCyclePhase = S_PHASE;
     }
-    else if (time_since_birth < GetG1Duration() + GetSDuration() + GetG2Duration())
+    else if (timeSinceBirth < GetG1Duration() + GetSDuration() + GetG2Duration())
     {
         mCurrentCellCyclePhase = G_TWO_PHASE;
     }
-    else if (time_since_birth < GetG1Duration() + GetSDuration() + GetG2Duration() + GetMDuration())
+    else if (timeSinceBirth < GetG1Duration() + GetSDuration() + GetG2Duration() + GetMDuration())
     {
         mCurrentCellCyclePhase = M_PHASE;
     }

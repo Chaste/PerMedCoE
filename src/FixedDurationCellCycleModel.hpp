@@ -66,4 +66,4 @@ public:
 #include "SerializationExportWrapper.hpp"
 CHASTE_CLASS_EXPORT(FixedDurationCellCycleModel)
 
-#endif /*FIXEDDURATIONCELLCYCLEMODEL_HPP_*/
+#endif // FIXEDDURATIONCELLCYCLEMODEL_HPP_

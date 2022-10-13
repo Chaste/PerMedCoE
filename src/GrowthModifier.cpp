@@ -70,29 +70,29 @@ void GrowthModifier<DIM>::UpdateCellData(AbstractCellPopulation<DIM,DIM>& rCellP
     rCellPopulation.Update(); // Make sure the cell population is updated
 
     // Get volume for each cell
-    for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-         cell_iter != rCellPopulation.End();
-         ++cell_iter)
+    for (typename AbstractCellPopulation<DIM>::Iterator pCell = rCellPopulation.Begin();
+         pCell != rCellPopulation.End();
+         ++pCell)
     {
-        double cell_volume = rCellPopulation.GetVolumeOfCell(*cell_iter);
-        cell_iter->GetCellData()->SetItem("volume", cell_volume);
+        double cellVolume = rCellPopulation.GetVolumeOfCell(*pCell);
+        pCell->GetCellData()->SetItem("volume", cellVolume);
     }
     
     // Set target radius for each cell
-    for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
-         cell_iter != rCellPopulation.End();
-         ++cell_iter)
+    for (typename AbstractCellPopulation<DIM>::Iterator pCell = rCellPopulation.Begin();
+         pCell != rCellPopulation.End();
+         ++pCell)
     {
-        double init_target_area = 0.5; // todo: fix magic number from target area modifier
-        double target_area = cell_iter->GetCellData()->GetItem("target area");
-        double size_factor = target_area / init_target_area;
+        double initialTargetArea = 0.5; // todo: fix magic number from target area modifier
+        double targetArea = pCell->GetCellData()->GetItem("target area");
+        double sizeFactor = targetArea / initialTargetArea;
 
-        double init_radius = 0.5; // todo: fix magic number from test setup
-        double init_volume = (4.0 * M_PI * init_radius * init_radius * init_radius) / 3.0;
-        double target_volume = init_volume * size_factor;
-        double target_radius = std::cbrt((3.0 * target_volume) / (4.0 * M_PI));
+        double initialRadius = 0.5; // todo: fix magic number from test setup
+        double initialVolume = (4.0 * M_PI * initialRadius * initialRadius * initialRadius) / 3.0;
+        double targetVolume = initialVolume * sizeFactor;
+        double targetRadius = std::cbrt((3.0 * targetVolume) / (4.0 * M_PI));
 
-        cell_iter->GetCellData()->SetItem("Radius", target_radius);
+        pCell->GetCellData()->SetItem("Radius", targetRadius);
     }
 
     rCellPopulation.Update(); // Update node radii from cell radii

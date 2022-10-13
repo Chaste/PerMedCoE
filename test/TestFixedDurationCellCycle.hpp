@@ -76,40 +76,40 @@ public:
         NodesOnlyMesh<3> mesh;
 
         // Length is dimensionless and based on typical cell diameter i.e. approx 10 um
-        double max_interaction_radius = 1.5; // 15 um neighbour interaction distance
-        mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
+        double maxInteractionRadius = 1.5; // 15 um neighbour interaction distance
+        mesh.ConstructNodesWithoutMesh(nodes, maxInteractionRadius);
 
         // Create cell cycle model
-        FixedDurationCellCycleModel* p_cell_cycle_model = new FixedDurationCellCycleModel;
+        FixedDurationCellCycleModel* pCellCycleModel = new FixedDurationCellCycleModel;
 
         // Create cell
-        MAKE_PTR(WildTypeCellMutationState, p_mutation_state);
-        MAKE_PTR(StemCellProliferativeType, p_proliferative_type);
-        MAKE_PTR_ARGS(Cell, p_cell, (p_mutation_state, p_cell_cycle_model));
-        p_cell->SetCellProliferativeType(p_proliferative_type);
-        p_cell->InitialiseCellCycleModel();
-        p_cell->GetCellData()->SetItem("Radius", 0.5); // 5um cell radius
+        MAKE_PTR(WildTypeCellMutationState, pMutationState);
+        MAKE_PTR(StemCellProliferativeType, pProliferativeType);
+        MAKE_PTR_ARGS(Cell, pCell, (pMutationState, pCellCycleModel));
+        pCell->SetCellProliferativeType(pProliferativeType);
+        pCell->InitialiseCellCycleModel();
+        pCell->GetCellData()->SetItem("Radius", 0.5); // 5um cell radius
 
         // Verify phase durations are correct
-        p_cell_cycle_model = static_cast<FixedDurationCellCycleModel*>(p_cell->GetCellCycleModel());
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetG1Duration(), 7.0, 1e-9);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetStemCellG1Duration(), 7.0, 1e-9);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetTransitCellG1Duration(), 7.0, 1e-9);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetSDuration(), 6.0, 1e-9);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetG2Duration(), 3.0, 1e-9);
-        TS_ASSERT_DELTA(p_cell_cycle_model->GetMDuration(), 2.0, 1e-9);
+        pCellCycleModel = static_cast<FixedDurationCellCycleModel*>(pCell->GetCellCycleModel());
+        TS_ASSERT_DELTA(pCellCycleModel->GetG1Duration(), 7.0, 1e-9);
+        TS_ASSERT_DELTA(pCellCycleModel->GetStemCellG1Duration(), 7.0, 1e-9);
+        TS_ASSERT_DELTA(pCellCycleModel->GetTransitCellG1Duration(), 7.0, 1e-9);
+        TS_ASSERT_DELTA(pCellCycleModel->GetSDuration(), 6.0, 1e-9);
+        TS_ASSERT_DELTA(pCellCycleModel->GetG2Duration(), 3.0, 1e-9);
+        TS_ASSERT_DELTA(pCellCycleModel->GetMDuration(), 2.0, 1e-9);
 
         // Create 3D cell population object to connect mesh and cell
         std::vector<CellPtr> cells;
-        cells.push_back(p_cell);
-        NodeBasedCellPopulation<3> cell_population(mesh, cells);
-        cell_population.SetUseVariableRadii(true); // Use Radius from CellData
+        cells.push_back(pCell);
+        NodeBasedCellPopulation<3> cellPopulation(mesh, cells);
+        cellPopulation.SetUseVariableRadii(true); // Use Radius from CellData
 
         // Add output writers
-        cell_population.AddCellWriter<CellCycleWriter>();
+        cellPopulation.AddCellWriter<CellCycleWriter>();
 
         // Create an OffLatticeSimulation with the population
-        OffLatticeSimulation<3> simulator(cell_population);
+        OffLatticeSimulation<3> simulator(cellPopulation);
 
         // Set some simulation options
         simulator.SetOutputDirectory("FixedDurationCellCycle");
@@ -120,19 +120,19 @@ public:
         // Define boundary sphere
         c_vector<double,3> centre = zero_vector<double>(3);
         double radius = 3.0; // 60 um diameter
-        MAKE_PTR_ARGS(SphereGeometryBoundaryCondition<3>, p_boundary_condition, (&cell_population, centre, radius));
-        simulator.AddCellPopulationBoundaryCondition(p_boundary_condition);
+        MAKE_PTR_ARGS(SphereGeometryBoundaryCondition<3>, pBoundaryCondition, (&cellPopulation, centre, radius));
+        simulator.AddCellPopulationBoundaryCondition(pBoundaryCondition);
 
         // Add force for cell movement
-         MAKE_PTR(RepulsionForce<3>, p_force);
-         simulator.AddForce(p_force);
+         MAKE_PTR(RepulsionForce<3>, pForce);
+         simulator.AddForce(pForce);
 
         // Add simulation modifiers
-        MAKE_PTR(SimpleTargetAreaModifier<3>, p_target_area_modifier); // calculates target area
-        simulator.AddSimulationModifier(p_target_area_modifier);
+        MAKE_PTR(SimpleTargetAreaModifier<3>, pTargetAreaModifier); // calculates target area
+        simulator.AddSimulationModifier(pTargetAreaModifier);
 
-        MAKE_PTR(GrowthModifier<3>, p_growth_modifier); // records volume, sizes radii proportional to target area
-        simulator.AddSimulationModifier(p_growth_modifier);
+        MAKE_PTR(GrowthModifier<3>, pGrowthModifier); // records volume, sizes radii proportional to target area
+        simulator.AddSimulationModifier(pGrowthModifier);
 
         // Run the simulation
         simulator.Solve();

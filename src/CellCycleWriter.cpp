@@ -56,8 +56,8 @@ CellCycleWriter<ELEMENT_DIM, SPACE_DIM>::CellCycleWriter()
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 double CellCycleWriter<ELEMENT_DIM, SPACE_DIM>::GetCellDataForVtkOutput(CellPtr pCell, AbstractCellPopulation<ELEMENT_DIM, SPACE_DIM>* pCellPopulation)
 {
-    double volume = pCellPopulation->GetVolumeOfCell(pCell);
-    return volume;
+    double cellVolume = pCell->GetCellData()->GetItem("volume");
+    return cellVolume;
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -72,23 +72,22 @@ void CellCycleWriter<ELEMENT_DIM, SPACE_DIM>::VisitCell(CellPtr pCell, AbstractC
         *this->mpOutStream << coordinates[i] << " ";
     }
 
-    AbstractPhaseBasedCellCycleModel* p_cell_cycle_model;
-    p_cell_cycle_model = static_cast<AbstractPhaseBasedCellCycleModel*>(pCell->GetCellCycleModel());
+    auto pCellCycleModel = static_cast<AbstractPhaseBasedCellCycleModel*>(pCell->GetCellCycleModel());
 
-    double g1_duration = p_cell_cycle_model->GetG1Duration();
-    *this->mpOutStream << g1_duration << " ";
+    double phaseG1Duration = pCellCycleModel->GetG1Duration();
+    *this->mpOutStream << phaseG1Duration << " ";
 
-    double s_duration = p_cell_cycle_model->GetSDuration();
-    *this->mpOutStream << s_duration << " ";
+    double phaseSDuration = pCellCycleModel->GetSDuration();
+    *this->mpOutStream << phaseSDuration << " ";
 
-    double g2_duration = p_cell_cycle_model->GetG2Duration();
-    *this->mpOutStream << g2_duration << " ";
+    double phaseG2Duration = pCellCycleModel->GetG2Duration();
+    *this->mpOutStream << phaseG2Duration << " ";
 
-    double m_duration = p_cell_cycle_model->GetMDuration();
-    *this->mpOutStream << m_duration << " ";
+    double phaseMDuration = pCellCycleModel->GetMDuration();
+    *this->mpOutStream << phaseMDuration << " ";
 
-    CellCyclePhase current_cell_cycle_phase = p_cell_cycle_model->GetCurrentCellCyclePhase();
-    switch (current_cell_cycle_phase)
+    CellCyclePhase currentCellCyclePhase = pCellCycleModel->GetCurrentCellCyclePhase();
+    switch (currentCellCyclePhase)
     {
         case G_ZERO_PHASE:
             *this->mpOutStream << "G0 ";
@@ -106,14 +105,15 @@ void CellCycleWriter<ELEMENT_DIM, SPACE_DIM>::VisitCell(CellPtr pCell, AbstractC
             *this->mpOutStream << "M ";
             break;
         default:
+            *this->mpOutStream << "ERROR ";
             NEVER_REACHED;
     }
 
-    double target_area = pCell->GetCellData()->GetItem("target area");
-    *this->mpOutStream << target_area << " ";
+    double targetArea = pCell->GetCellData()->GetItem("target area");
+    *this->mpOutStream << targetArea << " ";
 
-    double volume = pCell->GetCellData()->GetItem("volume");
-    *this->mpOutStream << volume << " ";
+    double cellVolume = pCell->GetCellData()->GetItem("volume");
+    *this->mpOutStream << cellVolume << " ";
 }
 
 // Explicit instantiation

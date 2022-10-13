@@ -66,4 +66,4 @@ public:
 #include "SerializationExportWrapper.hpp"
 CHASTE_CLASS_EXPORT(StochasticDurationCellCycleModel)
 
-#endif /*STOCHASTICDURATIONCELLCYCLEMODEL_HPP_*/
+#endif // STOCHASTICDURATIONCELLCYCLEMODEL_HPP_

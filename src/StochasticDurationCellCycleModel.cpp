@@ -51,9 +51,9 @@ void StochasticDurationCellCycleModel::serialize(Archive & archive, const unsign
     // Archive RandomNumberGenerator singleton.
     // Must be done carefully: first serialize directly, then via pointer.
     // This prevents tripping an assertion when a second class instance is created on de-serialization.
-    RandomNumberGenerator* p_gen = RandomNumberGenerator::Instance();
-    archive & *p_gen; // First serialize directly
-    archive & p_gen; // Then serialize via pointer
+    RandomNumberGenerator* pRandomGenerator = RandomNumberGenerator::Instance();
+    archive & *pRandomGenerator; // First serialize directly
+    archive & pRandomGenerator; // Then serialize via pointer
 }
 
 StochasticDurationCellCycleModel::StochasticDurationCellCycleModel()
@@ -87,20 +87,20 @@ void StochasticDurationCellCycleModel::SetG1Duration()
 AbstractCellCycleModel* StochasticDurationCellCycleModel::CreateCellCycleModel()
 {
     // Create a new cell-cycle model
-    StochasticDurationCellCycleModel* p_model = new StochasticDurationCellCycleModel();
-    return p_model;
+    StochasticDurationCellCycleModel* pCellCycleModel = new StochasticDurationCellCycleModel();
+    return pCellCycleModel;
 }
 
 void StochasticDurationCellCycleModel::UpdateCellCyclePhase()
 {
-    double time_since_birth = GetAge();
-    assert(time_since_birth >= 0);
+    double timeSinceBirth = GetAge();
+    assert(timeSinceBirth >= 0);
 
     if (mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
     {
         mCurrentCellCyclePhase = G_ZERO_PHASE;
     }
-    else if (time_since_birth < GetG1Duration())
+    else if (timeSinceBirth < GetG1Duration())
     { 
         // Reset phase durations after each cycle
         if (GetCurrentCellCyclePhase() == M_PHASE)
@@ -110,15 +110,15 @@ void StochasticDurationCellCycleModel::UpdateCellCyclePhase()
         }
         mCurrentCellCyclePhase = G_ONE_PHASE;
     }
-    else if (time_since_birth <  GetG1Duration() + GetSDuration())
+    else if (timeSinceBirth <  GetG1Duration() + GetSDuration())
     {
         mCurrentCellCyclePhase = S_PHASE;
     }
-    else if (time_since_birth < GetG1Duration() + GetSDuration() + GetG2Duration())
+    else if (timeSinceBirth < GetG1Duration() + GetSDuration() + GetG2Duration())
     {
         mCurrentCellCyclePhase = G_TWO_PHASE;
     }
-    else if (time_since_birth < GetG1Duration() + GetSDuration() + GetG2Duration() + GetMDuration())
+    else if (timeSinceBirth < GetG1Duration() + GetSDuration() + GetG2Duration() + GetMDuration())
     {
         mCurrentCellCyclePhase = M_PHASE;
     }
