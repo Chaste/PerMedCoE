@@ -42,9 +42,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractCellBasedSimulationModifier.hpp"
 
 /**
- * A modifier class which at each simulation time step updates the 
- * radius of each cell based on the target area and stores
- * the values in the CellData property.
+ * A modifier class which at each simulation time step records the 
+ * volume of each cell and updates is radius based on the target area.
+ * The values are stored in the CellData property.
  * To be used together with a target area modifier.
  */
 template<unsigned DIM>
