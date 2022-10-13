@@ -46,13 +46,13 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NodeBasedCellPopulation.hpp"
 #include "NodesOnlyMesh.hpp"
 #include "OffLatticeSimulation.hpp"
+#include "SimpleTargetAreaModifier.hpp"
 #include "SphereGeometryBoundaryCondition.hpp"
 #include "StemCellProliferativeType.hpp"
+#include "WildTypeCellMutationState.hpp"
 
-#include "CellIdWriter.hpp"
-#include "CellLabelWriter.hpp"
-#include "CellVolumesWriter.hpp"
-#include "VolumeTrackingModifier.hpp"
+#include "CellCycleWriter.hpp"
+#include "GrowthModifier.hpp"
 
 // PETSc must be initialized to solve linear algebra problems in Chaste.
 // For sequential code, FakePetscSetup.hpp starts PETSc on a single rank.
@@ -85,11 +85,12 @@ public:
         // Create cell
         MAKE_PTR(WildTypeCellMutationState, p_mutation_state);
         MAKE_PTR(StemCellProliferativeType, p_proliferative_type);
-        CellPtr p_cell(new Cell(p_mutation_state, p_cell_cycle_model));
+        MAKE_PTR_ARGS(Cell, p_cell, (p_mutation_state, p_cell_cycle_model));
         p_cell->SetCellProliferativeType(p_proliferative_type);
         p_cell->InitialiseCellCycleModel();
+        p_cell->GetCellData()->SetItem("Radius", 0.5); // 5um cell radius
 
-        // Verify phase durations
+        // Verify phase durations are sensible
         p_cell_cycle_model = static_cast<StochasticDurationCellCycleModel*>(p_cell->GetCellCycleModel());
         TS_ASSERT_DELTA(p_cell_cycle_model->GetG1Duration(), 7.0, 4.0 * 0.7);
         TS_ASSERT_DELTA(p_cell_cycle_model->GetStemCellG1Duration(), 7.0, 4.0 * 0.7);
@@ -102,11 +103,10 @@ public:
         std::vector<CellPtr> cells;
         cells.push_back(p_cell);
         NodeBasedCellPopulation<3> cell_population(mesh, cells);
+        cell_population.SetUseVariableRadii(true); // Use Radius from CellData
 
         // Add output writers
-        cell_population.AddCellWriter<CellIdWriter>();
-        cell_population.AddCellWriter<CellLabelWriter>();
-        cell_population.AddCellWriter<CellVolumesWriter>();
+        cell_population.AddCellWriter<CellCycleWriter>();
 
         // Create an OffLatticeSimulation with the population
         OffLatticeSimulation<3> simulator(cell_population);
@@ -127,12 +127,14 @@ public:
          MAKE_PTR(RepulsionForce<3>, p_force);
          simulator.AddForce(p_force);
 
-        // Add cell volume tracking modifier
-        MAKE_PTR(VolumeTrackingModifier<3>, p_modifier);
-        simulator.AddSimulationModifier(p_modifier);
+        // Add simulation modifiers
+        MAKE_PTR(SimpleTargetAreaModifier<3>, p_target_area_modifier);
+        simulator.AddSimulationModifier(p_target_area_modifier);
+
+        MAKE_PTR(GrowthModifier<3>, p_growth_modifier);
+        simulator.AddSimulationModifier(p_growth_modifier);
 
         // Run the simulation
-        cell_population.Update(true); // Needed for CellVolumesWriter, else throws
         simulator.Solve();
         
         // Memory management
@@ -143,4 +145,4 @@ public:
     }
 };
 
-#endif /*TESTSTOCHASTICDURATIONCELLCYCLE_HPP_*/
+#endif // TESTSTOCHASTICDURATIONCELLCYCLE_HPP_

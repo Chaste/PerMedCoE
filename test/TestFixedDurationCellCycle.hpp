@@ -90,7 +90,7 @@ public:
         p_cell->InitialiseCellCycleModel();
         p_cell->GetCellData()->SetItem("Radius", 0.5); // 5um cell radius
 
-        // Verify phase durations
+        // Verify phase durations are correct
         p_cell_cycle_model = static_cast<FixedDurationCellCycleModel*>(p_cell->GetCellCycleModel());
         TS_ASSERT_DELTA(p_cell_cycle_model->GetG1Duration(), 7.0, 1e-9);
         TS_ASSERT_DELTA(p_cell_cycle_model->GetStemCellG1Duration(), 7.0, 1e-9);
@@ -128,11 +128,11 @@ public:
          simulator.AddForce(p_force);
 
         // Add simulation modifiers
-        MAKE_PTR(SimpleTargetAreaModifier<3>, p_growth_modifier);
-        simulator.AddSimulationModifier(p_growth_modifier);
+        MAKE_PTR(SimpleTargetAreaModifier<3>, p_target_area_modifier);
+        simulator.AddSimulationModifier(p_target_area_modifier);
 
-        MAKE_PTR(GrowthModifier<3>, p_modifier);
-        simulator.AddSimulationModifier(p_modifier);
+        MAKE_PTR(GrowthModifier<3>, p_growth_modifier);
+        simulator.AddSimulationModifier(p_growth_modifier);
 
         // Run the simulation
         simulator.Solve();
@@ -145,4 +145,4 @@ public:
     }
 };
 
-#endif /*TESTFIXEDDURATIONCELLCYCLE_HPP_*/
+#endif // TESTFIXEDDURATIONCELLCYCLE_HPP_
