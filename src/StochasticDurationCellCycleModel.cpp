@@ -64,17 +64,17 @@ StochasticDurationCellCycleModel::StochasticDurationCellCycleModel()
 
 void StochasticDurationCellCycleModel::SetPhaseDurations()
 {
-    double g1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
-    double sDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(6.0, 0.6);
-    double g2Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(3.0, 0.3);
-    double mDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(2.0, 0.2);
+    double phaseG1Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(7.0, 0.7);
+    double phaseSDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(6.0, 0.6);
+    double phaseG2Duration = RandomNumberGenerator::Instance()->NormalRandomDeviate(3.0, 0.3);
+    double phaseMDuration = RandomNumberGenerator::Instance()->NormalRandomDeviate(2.0, 0.2);
 
-    SetStemCellG1Duration(g1Duration);
-    SetTransitCellG1Duration(g1Duration);
-    SetSDuration(sDuration);
-    SetG2Duration(g2Duration);
-    SetMDuration(mDuration);
-    SetMinimumGapDuration(std::min(g1Duration, g2Duration));
+    SetStemCellG1Duration(phaseG1Duration);
+    SetTransitCellG1Duration(phaseG1Duration);
+    SetSDuration(phaseSDuration);
+    SetG2Duration(phaseG2Duration);
+    SetMDuration(phaseMDuration);
+    SetMinimumGapDuration(std::min(phaseG1Duration, phaseG2Duration));
 }
 
 void StochasticDurationCellCycleModel::SetG1Duration()
