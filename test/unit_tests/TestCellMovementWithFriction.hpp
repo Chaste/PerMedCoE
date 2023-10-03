@@ -48,32 +48,16 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PetscSetupAndFinalize.hpp"
 #include "CellsGenerator.hpp"
 #include "NoCellCycleModel.hpp"
-#include "VertexBasedCellPopulation.hpp"
+#include "NodeBasedCellPopulation.hpp"
 #include "OffLatticeSimulation.hpp"
 #include "TransitCellProliferativeType.hpp"
-#include "HoneycombVertexMeshGenerator.hpp"
+#include "HoneycombMeshGenerator.hpp"
 #include "RepulsionForce.hpp"
 #include "FakePetscSetup.hpp"
 
-#include "DragForce.hpp"
-#include "ExperiencesDrag.hpp"
+#include "InstantaneousVelocityForce.hpp"
 
-/**
- * @file
- *
- * This is an example of a CxxTest test suite, used to test the source
- * code, and also used to run simulations (as it provides a handy
- * shortcut to compile and link against the correct libraries using scons).
- *
- * You can #include any of the files in the project 'src' folder.
- * For example here we #include "Hello.hpp"
- *
- * You can utilise any of the code in the main the Chaste trunk
- * in exactly the same way.
- * NOTE: you will have to alter the project SConscript file lines 41-44
- * to enable #including of code from the 'heart', 'cell_based' or 'crypt'
- * components of Chaste.
- */
+
 
 class TestCellMechanics : public AbstractCellBasedTestSuite
 {
@@ -87,48 +71,52 @@ public:
     void TestCellMechanicsCellMovement() {
 
       // Generate a mesh
-      HoneycombVertexMeshGenerator generator(1, 1);
-      MutableVertexMesh<2,2>* p_mesh = generator.GetMesh().get();
+      HoneycombMeshGenerator generator(1, 1);
+      MutableMesh<2,2>* p_generating_mesh = generator.GetMesh().get();
+      NodesOnlyMesh<2> mesh;
+      mesh.ConstructNodesWithoutMesh(*p_generating_mesh, 1.5);
 
       // Add the cell 
       std::vector<CellPtr> cells;
-      MAKE_PTR(TransitCellProliferativeType, p_transit_type);
-      MAKE_PTR(WildTypeCellMutationState, p_state); 
-      MAKE_PTR(ExperiencesDrag, p_drag);
-      p_drag->coefficient = 0.001;
-
-      for (unsigned int i = 0; i < p_mesh->GetNumElements(); i++) {
-        auto cell_cycle_model = new NoCellCycleModel();
-        CellPropertyCollection collection;
-        collection.AddProperty(p_drag);
-        CellPtr cell(new Cell(p_state, cell_cycle_model, nullptr, false, collection));
-        cell->SetCellProliferativeType(p_transit_type);
-        cell->SetBirthTime(0);
-        cells.push_back(cell);
-      }
+      CellsGenerator<NoCellCycleModel, 2> cells_generator;
+      cells_generator.GenerateBasicRandom(cells, mesh.GetNumNodes());
 
       // Set initial conditions
+      // Expressed in units of simulation units/hour
+      // Assuming 1 unit = 10um
       c_vector<double, 2> initialVelocity;
-      initialVelocity[0] = 1.0;
+      initialVelocity[0] = 600.0;
       initialVelocity[1] = 0.0;
 
-      MAKE_PTR(DragForce<2>, force);
+      MAKE_PTR(InstantaneousVelocityForce<2>, force);
       force->SetVelocity(initialVelocity);
 
       // Setup cell population
-      VertexBasedCellPopulation<2> cell_population(*p_mesh, cells);
+      NodeBasedCellPopulation<2> cell_population(mesh, cells);
+      cell_population.Update();
+
+      // Add node location writer
+      using LocationWriter = NodeLocationWriter<2, 2>;
+      MAKE_PTR(LocationWriter, writer);
+      writer->SetFileName("node_locations.dat");
+      cell_population.AddPopulationWriter(writer);
 
       // Set up simulator
       OffLatticeSimulation<2> simulator(cell_population);
-      simulator.SetOutputDirectory("CellBasedDemo1");
-      simulator.SetEndTime(1.0 / 6.0); // 10 mins
-      simulator.SetDt(1.0 / (60.0 * 10.0)); // 0.1 mins
+      simulator.SetOutputDirectory("PerMedCoE");
+      simulator.SetEndTime(1.0 / 6.0); // 10 mins expressed in hours
+      simulator.SetDt(1.0 / (60.0 * 10.0)); // 0.1 mins expressed in hours
       simulator.AddForce(force);
 
       // Perform simulation
       simulator.Solve();
 
+      // Write the results
+      std::string output_directory = "PerMedCoE";
+      OutputFileHandler output_file_handler(output_directory, false);
+      cell_population.OpenWritersFiles(output_file_handler);
+      cell_population.WriteResultsToFiles(output_directory);
     }
 };
 
-#endif /*TESTHELLO_HPP_*/
+#endif 
