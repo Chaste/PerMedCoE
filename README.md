@@ -30,9 +30,11 @@ See also https://github.com/Chaste/Chaste/issues/166.
   
 ## Mechanics - Movement of a Cell with Friction
 
-* We are working towards an implementation of this unit test in Chaste.
+* Now implemented in Chaste.
 * For this unit test in particular, it would be good to see the Physicell code so we can work out precisely how they interpreted the unit test specification, so that we can do something as close as possible.
 * Figure 2.1.2.e on page 17 of the [benchmarking report](https://drive.google.com/file/d/1bgpD29n1Wr-scJkfA8KehB2m3UyFOBeB/view?usp=drive_link) seems to be a plot of velocity against time, not distance moved against time as claimed. Can Arnau check this?
+
+![results](results/mechanics-single-cell-with-friction/plot.png)
   
 ## Mechanics - Two Cells Pushing Each Other
 
