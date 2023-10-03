@@ -2,4 +2,5 @@ unit_tests/TestFixedDurationCellCycle.hpp
 unit_tests/TestStochasticDurationCellCycle.hpp
 unit_tests/TestDiffusionSmall.hpp
 unit_tests/TestCellMovementWithFriction.hpp
+unit_tests/TestMechanicsPushing.hpp
 TestDiffusionEquationWithSinkTerm.hpp
