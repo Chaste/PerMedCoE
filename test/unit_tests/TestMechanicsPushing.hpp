@@ -38,16 +38,17 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cxxtest/TestSuite.h>
 
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include "AbstractCellBasedTestSuite.hpp"
-#include "Cell.hpp"
 #include "CellsGenerator.hpp"
-#include "DifferentiatedCellProliferativeType.hpp"
-#include "FixedG1GenerationalCellCycleModel.hpp"
 #include "GeneralisedLinearSpringForce.hpp"
+#include "NoCellCycleModel.hpp"
 #include "NodeBasedCellPopulation.hpp"
+#include "NodeLocationWriter.hpp"
 #include "NodesOnlyMesh.hpp"
 #include "OffLatticeSimulation.hpp"
-#include "SmartPointers.hpp"
 
 // PETSc must be initialized to solve linear algebra problems in Chaste.
 // For sequential code, FakePetscSetup.hpp starts PETSc on a single rank.
@@ -58,43 +59,46 @@ class TestMechanicsPushing : public AbstractCellBasedTestSuite
 public:
     void TestNodeBasedMechanicsPushingTwoCells()
     {
+        // Description: two cells moving towards each other's centres at a velocity of 10 um/min
+
         // Cannot currently run cell-based simulations in parallel.
         EXIT_IF_PARALLEL;
 
         // Create two 1D nodes
-        std::vector<Node<1>*> nodes;
-        std::vector<double> coords{ 0.0 };
-        nodes.push_back(new Node<1>(0u, coords, false));
-        coords[0] = 10.0;
-        nodes.push_back(new Node<1>(1u, coords, false));
-
-        // Create a 1D NodesOnlyMesh
-        NodesOnlyMesh<1> mesh;
-
         // Length is dimensionless and based on typical cell diameter i.e. approx 10 um
-        double max_interaction_radius = 1.5; // 15 um neighbour interaction distance
+        // Cell centres are initially 30 um apart
+        std::vector<Node<1>*> nodes;
+        nodes.push_back(new Node<1>(0u, std::vector<double>(1, 0.0), false));
+        nodes.push_back(new Node<1>(1u, std::vector<double>(1, 30.0), false));
+
+        // Create a 1D nodes-only mesh with 15 um neighbour interaction distance.
+        double max_interaction_radius = 1.5;
+        NodesOnlyMesh<1> mesh;
         mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
 
-        // Create cells
+        // Create the cells. These cells do not grow.
         std::vector<CellPtr> cells;
-        MAKE_PTR(DifferentiatedCellProliferativeType, p_diff_type);
-        CellsGenerator<FixedG1GenerationalCellCycleModel, 1> cells_generator;
-        cells_generator.GenerateBasic(cells, 2, std::vector<unsigned>(), p_diff_type);
+        CellsGenerator<NoCellCycleModel, 1> cells_generator;
+        cells_generator.GenerateBasic(cells, mesh.GetNumNodes());
 
-        // Create cell population to connect mesh and cells
+        // Create a cell population to connect the mesh and cells
         NodeBasedCellPopulation<1> cell_population(mesh, cells);
 
-        // Create an OffLatticeSimulation with the population
+        // Add a node location writer to the cell population
+        auto p_writer = boost::make_shared<NodeLocationWriter<1, 1> >();
+        cell_population.AddPopulationWriter(p_writer); // output: results.viznodes
+
+        // Create an off-lattice simulation with the cell population
         OffLatticeSimulation<1> simulator(cell_population);
 
         // Set some simulation options
-        simulator.SetOutputDirectory("MechanicsPushing");
+        simulator.SetOutputDirectory("TestMechanicsPushing");
         simulator.SetEndTime(1.0 / 6.0); // 10 min
-        simulator.SetDt(1.0 / 60.0); // 0.1 min
-        simulator.SetSamplingTimestepMultiple(1); // 1 min
+        simulator.SetDt(1.0 / 600.0); // 0.1 min
+        simulator.SetSamplingTimestepMultiple(1); // 0.1 min
 
-        // Add force for cell movement
-        MAKE_PTR(GeneralisedLinearSpringForce<1>, p_force);
+        // Add a force for cell movement
+        auto p_force = boost::make_shared<GeneralisedLinearSpringForce<1> >();
         simulator.AddForce(p_force);
 
         // Run the simulation
