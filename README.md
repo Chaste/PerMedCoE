@@ -36,6 +36,8 @@ See also https://github.com/Chaste/Chaste/issues/166.
   
 ## Mechanics - Two Cells Pushing Each Other
 
+* We are working towards an implementation of this unit test in Chaste.
+
 ## One Cell with Chemotaxis
 
 ## Use Case - 2D Monolayer without Diffusion
