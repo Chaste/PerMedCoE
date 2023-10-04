@@ -38,7 +38,9 @@ See also https://github.com/Chaste/Chaste/issues/166.
   
 ## Mechanics - Two Cells Pushing Each Other
 
-* We are working towards an implementation of this unit test in Chaste.
+* Now implemented in Chaste.
+
+![results](results/mechanics-two-cells-pushing/plot.png)
 
 ## One Cell with Chemotaxis
 
