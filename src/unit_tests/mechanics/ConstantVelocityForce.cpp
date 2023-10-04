@@ -52,15 +52,36 @@ void ConstantVelocityForce<ELEMENT_DIM, SPACE_DIM>::AddForceContribution(Abstrac
 
         if (SPACE_DIM >= 1)
         {
-            force[0] = cellData->GetItem("x_velocity");
+            if (cellData->HasItem("x_velocity"))
+            {
+                force[0] = cellData->GetItem("x_velocity");
+            }
+            else
+            {
+                force[0] = 0.0;
+            }
         }
         if (SPACE_DIM >= 2)
         {
-            force[1] = cellData->GetItem("y_velocity");
+            if (cellData->HasItem("y_velocity"))
+            {
+                force[1] = cellData->GetItem("y_velocity");
+            }
+            else
+            {
+                force[1] = 0.0;
+            }
         }
         if (SPACE_DIM == 3)
         {
-            force[2] = cellData->GetItem("z_velocity");
+            if (cellData->HasItem("z_velocity"))
+            {
+                force[2] = cellData->GetItem("z_velocity");
+            }
+            else
+            {
+                force[2] = 0.0;
+            }
         }
 
         // Apply the force
