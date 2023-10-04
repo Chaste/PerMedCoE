@@ -42,15 +42,13 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ChasteSerialization.hpp"
 
 /**
- * A force law that moves each cell at a constant
- * velocity toward the center of its closest neighbour.
+ * A force law that moves each cell at a constant velocity
+ * set in the cell data as x_velocity, y_velocity, z_velocity
  */
 template <unsigned ELEMENT_DIM, unsigned SPACE_DIM = ELEMENT_DIM>
 class ConstantVelocityForce : public AbstractForce<ELEMENT_DIM, SPACE_DIM>
 {
 private:
-    double mVelocity;
-
     /** Needed for serialization. */
     friend class boost::serialization::access;
     /**
@@ -63,16 +61,13 @@ private:
     void serialize(Archive& archive, const unsigned int version)
     {
         archive& boost::serialization::base_object<ConstantVelocityForce<ELEMENT_DIM, SPACE_DIM> >(*this);
-        archive & mVelocity;
     }
 
 public:
     /**
      * Constructor.
-     *
-     * @param velocity the constant velocity
      */
-    ConstantVelocityForce(double velocity) : mVelocity(velocity){};
+    ConstantVelocityForce() = default;
 
     /**
      * Destructor.

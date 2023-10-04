@@ -60,16 +60,22 @@ class TestMechanicsPushing : public AbstractCellBasedTestSuite
 public:
     void TestNodeBasedMechanicsPushingTwoCells()
     {
-        // Description: two cells moving towards each other's centres at a velocity of 10 um/min
+        // Description: two cells moving towards each other's centres at a constant velocity
 
         // Cannot currently run cell-based simulations in parallel.
         EXIT_IF_PARALLEL;
+
+        // Simulation options
+        const std::string output_directory = "TestMechanicsPushing";
+        const double sim_end_time = 10.0 * (1.0 / 60.0); // total 10 min runtime (in hours)
+        const double sim_dt = 0.1 * (1.0 / 60.0); // 0.1 min per timestep (in hours)
+        const unsigned int sim_sampling = 1; // output every timestep
 
         // Create two 1D nodes
         // Length is dimensionless and based on typical cell diameter i.e. approx 10 um
         // Cell centres are initially 30 um apart
         auto p_node_0 = std::make_unique<Node<1> >(0u, std::vector<double>(1, 0.0), false);
-        auto p_node_1 = std::make_unique<Node<1> >(1u, std::vector<double>(1, 30.0), false);
+        auto p_node_1 = std::make_unique<Node<1> >(1u, std::vector<double>(1, 3.0), false);
         std::vector<Node<1>*> nodes = {p_node_0.get(), p_node_1.get()};
 
         // Create a 1D nodes-only mesh with 15 um neighbour interaction distance.
@@ -80,7 +86,13 @@ public:
         // Create the cells. These cells do not grow.
         std::vector<CellPtr> cells;
         CellsGenerator<NoCellCycleModel, 1> cells_generator;
-        cells_generator.GenerateBasic(cells, mesh.GetNumNodes());
+        cells_generator.GenerateBasic(cells, 2);
+
+        // Set a constant 10 um/min velocity for both cells toward each other
+        // where 10 um = 1 unit i.e. move 0.1 units during each 0.1 min timestep
+        const double x_velocity = 0.1 / sim_dt;
+        cells[0]->GetCellData()->SetItem("x_velocity", x_velocity);
+        cells[1]->GetCellData()->SetItem("x_velocity", -x_velocity);
 
         // Create a cell population to connect the mesh and cells
         NodeBasedCellPopulation<1> cell_population(mesh, cells);
@@ -93,17 +105,17 @@ public:
         // Create an off-lattice simulation with the cell population
         OffLatticeSimulation<1> simulator(cell_population);
 
-        // Set some simulation options
-        simulator.SetOutputDirectory("TestMechanicsPushing");
-        simulator.SetEndTime(1.0 / 6.0); // 10 min
-        simulator.SetDt(1.0 / 600.0); // 0.1 min
-        simulator.SetSamplingTimestepMultiple(1); // 0.1 min
+        // Set simulation options
+        simulator.SetOutputDirectory(output_directory);
+        simulator.SetEndTime(sim_end_time); 
+        simulator.SetDt(sim_dt);
+        simulator.SetSamplingTimestepMultiple(sim_sampling);
 
-        // Add a constant 10 um velocity force
-        auto p_constant_force = boost::make_shared<ConstantVelocityForce<1> >(600.0);
+        // Add a constant velocity force law
+        auto p_constant_force = boost::make_shared<ConstantVelocityForce<1> >();
         simulator.AddForce(p_constant_force);
 
-        // Add a generalised linear spring force
+        // Add a generalised linear spring force law
         auto p_spring_force = boost::make_shared<GeneralisedLinearSpringForce<1> >();
         simulator.AddForce(p_spring_force);
 

@@ -41,23 +41,31 @@ template <unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 void ConstantVelocityForce<ELEMENT_DIM, SPACE_DIM>::AddForceContribution(AbstractCellPopulation<ELEMENT_DIM, SPACE_DIM>& rCellPopulation)
 
 {
-    for (unsigned int i = 0; i < rCellPopulation.GetNumNodes(); i++)
+    for (auto pCell = rCellPopulation.Begin(); pCell != rCellPopulation.End(); ++pCell)
     {
+        // Retrieve the force's x, y, z components from cell data
         c_vector<double, SPACE_DIM> force;
+        auto cellData = pCell->GetCellData();
 
-        // Shortcut: implement only case for 2 cells in 1D space with cell 0 on the left
-        if (SPACE_DIM == 1)
+        assert(SPACE_DIM > 0);
+        assert(SPACE_DIM < 4);
+
+        if (SPACE_DIM >= 1)
         {
-            if (i == 0)
-            {
-                force[0] = mVelocity;
-            }
-            else
-            {
-                force[0] = -mVelocity;
-            }
-            rCellPopulation.GetNode(i)->AddAppliedForceContribution(force);
+            force[0] = cellData->GetItem("x_velocity");
         }
+        if (SPACE_DIM >= 2)
+        {
+            force[1] = cellData->GetItem("y_velocity");
+        }
+        if (SPACE_DIM == 3)
+        {
+            force[2] = cellData->GetItem("z_velocity");
+        }
+
+        // Apply the force
+        unsigned int i = rCellPopulation.GetLocationIndexUsingCell(*pCell);
+        rCellPopulation.GetNode(i)->AddAppliedForceContribution(force);
     }
 }
 
