@@ -43,6 +43,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AbstractCellBasedTestSuite.hpp"
 #include "CellsGenerator.hpp"
+#include "ConstantVelocityForce.hpp"
 #include "GeneralisedLinearSpringForce.hpp"
 #include "NoCellCycleModel.hpp"
 #include "NodeBasedCellPopulation.hpp"
@@ -67,9 +68,9 @@ public:
         // Create two 1D nodes
         // Length is dimensionless and based on typical cell diameter i.e. approx 10 um
         // Cell centres are initially 30 um apart
-        std::vector<Node<1>*> nodes;
-        nodes.push_back(new Node<1>(0u, std::vector<double>(1, 0.0), false));
-        nodes.push_back(new Node<1>(1u, std::vector<double>(1, 30.0), false));
+        auto p_node_0 = std::make_unique<Node<1> >(0u, std::vector<double>(1, 0.0), false);
+        auto p_node_1 = std::make_unique<Node<1> >(1u, std::vector<double>(1, 30.0), false);
+        std::vector<Node<1>*> nodes = {p_node_0.get(), p_node_1.get()};
 
         // Create a 1D nodes-only mesh with 15 um neighbour interaction distance.
         double max_interaction_radius = 1.5;
@@ -86,7 +87,8 @@ public:
 
         // Add a node location writer to the cell population
         auto p_writer = boost::make_shared<NodeLocationWriter<1, 1> >();
-        cell_population.AddPopulationWriter(p_writer); // output: results.viznodes
+        cell_population.AddPopulationWriter(p_writer);
+        p_writer->SetFileName("results.viznodelocations");
 
         // Create an off-lattice simulation with the cell population
         OffLatticeSimulation<1> simulator(cell_population);
@@ -97,18 +99,16 @@ public:
         simulator.SetDt(1.0 / 600.0); // 0.1 min
         simulator.SetSamplingTimestepMultiple(1); // 0.1 min
 
-        // Add a force for cell movement
-        auto p_force = boost::make_shared<GeneralisedLinearSpringForce<1> >();
-        simulator.AddForce(p_force);
+        // Add a constant 10 um velocity force
+        auto p_constant_force = boost::make_shared<ConstantVelocityForce<1> >(600.0);
+        simulator.AddForce(p_constant_force);
+
+        // Add a generalised linear spring force
+        auto p_spring_force = boost::make_shared<GeneralisedLinearSpringForce<1> >();
+        simulator.AddForce(p_spring_force);
 
         // Run the simulation
         simulator.Solve();
-
-        // Memory management
-        for (unsigned i = 0; i < nodes.size(); i++)
-        {
-            delete nodes[i];
-        }
     }
 };
 
