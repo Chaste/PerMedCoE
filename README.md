@@ -22,6 +22,7 @@ See also https://github.com/Chaste/Chaste/issues/166.
 
 * We are working towards an implementation of this unit test in Chaste.
 * The unit test specification does not unambiguously define the initial condition. Should c(x, 0) be 10 everywhere in the domain, 0 everywhere in the domain, or 10 everywhere in the domain except at the very centre? What is the spatial extent of the sink term? What discretization is required in the case of FEM? These aren't clear as currently described.
+* There is no definition of \lamba (= 20uM/0.01min) in the unit test - what is this parameter? It might be helpful to spell out the unit test mathematically.
 
 ## Diffusion - 1k Cells as Sinks
 
