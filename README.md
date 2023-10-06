@@ -8,9 +8,26 @@ See also https://github.com/Chaste/Chaste/issues/166.
  
 ## Cell Cycle - Fixed Duration
 
-* Ideally, we should record precisely how the `GrowthModifier` class (in particular, the numerical values used to relate cell volume to age) was constructed based on the [experimental dataset](https://github.com/PerMedCoE/observatory_benchmark/blob/main/multiscale_benchmark/2022_09_hackathon/experimental_data/unit_test_cellcycle/Flow%20Cytometry%20Cell%20Cycle%20volume%20dynamics.txt).
 * The unit test specification does not unambiguously describe how to specify the cell volume as a function of time, based on the [experimental dataset](https://github.com/PerMedCoE/observatory_benchmark/blob/main/multiscale_benchmark/2022_09_hackathon/experimental_data/unit_test_cellcycle/Flow%20Cytometry%20Cell%20Cycle%20volume%20dynamics.txt) provided. To improve comparison across tools, more detail is needed; ideally, Arnau should either specify cell volume as a function of time, or specify how the data should be interpolated over time (e.g. piecewise linearly).
 * Figure 2.1.2.b on page 14 of the [benchmarking report](https://drive.google.com/file/d/1bgpD29n1Wr-scJkfA8KehB2m3UyFOBeB/view?usp=drive_link) does not reflect the Chaste results recorded in the [github repo](https://github.com/PerMedCoE/observatory_benchmark/blob/main/multiscale_benchmark/2022_09_hackathon/Chaste/unit_test_cellcycle/results/cellcycle_fixed.png). Can Arnau update this?
+* Numerical values used to relate cell volume to age were fit from the [experimental dataset](https://github.com/PerMedCoE/observatory_benchmark/blob/main/multiscale_benchmark/2022_09_hackathon/experimental_data/unit_test_cellcycle/Flow%20Cytometry%20Cell%20Cycle%20volume%20dynamics.txt) using the procedure in the Python script below:
+  
+```python
+# scipy version: 1.11.3
+from scipy.optimize import curve_fit
+
+def func(x, a, b, c):
+    return a * x * x + b * x + c
+    
+relative_volume = [
+101.9551018, 107.9604984, 115.3709399, 123.3029321, 131.2110512, 138.7731663, 145.8130126, 152.2481633,
+158.0552476, 163.2468548, 167.856337, 171.9279316, 175.5104538, 178.6533687, 181.4044384, 183.8084021,
+185.9063225, 187.7353554, 189.3287777, 190.7161688, 191.9236745, 194.6832014, 195.3745722, 195.9758402]
+
+time_mins = range(0, 30*len(relative_volume), 30)
+popt, pcov = curve_fit(func, time_mins, relative_volume)
+print(popt)
+```
 
 ## Cell Cycle - Stochastic Duration
 
