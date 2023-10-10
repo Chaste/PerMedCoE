@@ -33,8 +33,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "AbstractCellPopulation.hpp"
+#include <boost/shared_ptr.hpp>
 
+#include "AbstractCellPopulation.hpp"
 #include "ConstantVelocityForce.hpp"
 
 template <unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -45,43 +46,19 @@ void ConstantVelocityForce<ELEMENT_DIM, SPACE_DIM>::AddForceContribution(Abstrac
     {
         // Retrieve the force's x, y, z components from cell data
         c_vector<double, SPACE_DIM> force;
-        auto cellData = pCell->GetCellData();
-
-        assert(SPACE_DIM > 0);
-        assert(SPACE_DIM < 4);
+        boost::shared_ptr<CellData> cellData = pCell->GetCellData();
 
         if (SPACE_DIM >= 1)
         {
-            if (cellData->HasItem("x_velocity"))
-            {
-                force[0] = cellData->GetItem("x_velocity");
-            }
-            else
-            {
-                force[0] = 0.0;
-            }
+            force[0] = cellData->HasItem("x_velocity") ? cellData->GetItem("x_velocity") : 0.0;
         }
         if (SPACE_DIM >= 2)
         {
-            if (cellData->HasItem("y_velocity"))
-            {
-                force[1] = cellData->GetItem("y_velocity");
-            }
-            else
-            {
-                force[1] = 0.0;
-            }
+            force[1] = cellData->HasItem("y_velocity") ? cellData->GetItem("y_velocity") : 0.0;
         }
         if (SPACE_DIM == 3)
         {
-            if (cellData->HasItem("z_velocity"))
-            {
-                force[2] = cellData->GetItem("z_velocity");
-            }
-            else
-            {
-                force[2] = 0.0;
-            }
+            force[2] = cellData->HasItem("z_velocity") ? cellData->GetItem("z_velocity") : 0.0;
         }
 
         // Apply the force

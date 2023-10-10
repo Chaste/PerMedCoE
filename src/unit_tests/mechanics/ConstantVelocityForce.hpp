@@ -49,6 +49,9 @@ template <unsigned ELEMENT_DIM, unsigned SPACE_DIM = ELEMENT_DIM>
 class ConstantVelocityForce : public AbstractForce<ELEMENT_DIM, SPACE_DIM>
 {
 private:
+    static_assert(SPACE_DIM > 0);
+    static_assert(SPACE_DIM < 4);
+
     /** Needed for serialization. */
     friend class boost::serialization::access;
     /**
@@ -62,7 +65,6 @@ private:
     {
         archive& boost::serialization::base_object<ConstantVelocityForce<ELEMENT_DIM, SPACE_DIM> >(*this);
     }
-
 public:
     /**
      * Constructor.
