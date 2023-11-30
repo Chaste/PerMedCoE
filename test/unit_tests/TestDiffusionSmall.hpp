@@ -40,6 +40,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BoundaryConditionsContainer.hpp"
 #include "ConstBoundaryCondition.hpp"
+#include "FileFinder.hpp"
+#include "Hdf5DataReader.hpp"
 #include "OutputFileHandler.hpp"
 #include "SimpleLinearEllipticSolver.hpp"
 #include "SimpleLinearParabolicSolver.hpp"
@@ -60,15 +62,18 @@ class TestDiffusionSmall : public CxxTest::TestSuite
 {
 
 public:
-    void Test3x3x3Voxels()
+    void Test3x3x3()
     {
+        // Target number of nodes in each dimension, so we have num_nodes x num_nodes x num_nodes in the domain
+        const unsigned num_nodes = 3;
+
         // Simulation parameters from PerMedCoE document
         const double width_xyz = 60.0; // 60 x 60 x 60 micrometers,
-        const double vox_size = 20.0; // 20 micrometer^3 voxels
+        const double vox_size = width_xyz / (num_nodes - 1u);
         const double initial_concentration = 0.0; // no concentration initially
-        const double source_strength = 10.0; // 10 microMol per minute
-        const double sink_strength = 20.0; // 20 microMol per minute
-        const double sink_square_radius = 5.0; // 20 microMol per minute
+        const double source_strength = 10.0; // constant concentration on the boundary
+        const double sink_strength = 2000.0; // 20 microMol per 0.01 minute
+        const double sink_square_radius = 1e-6; // sink-size, diameter in inf norm
         const double diffusion_coefficient = 2000.0; // 2000 micrometer^2 per minute
 
         // Create a 60 by 60 by 60 mesh in 3D. The first parameter is the cartesian space-step and the
@@ -106,7 +111,7 @@ public:
         solver.SetTimeStep(dt);
 
         // Set where to output solution
-        solver.SetOutputDirectoryAndPrefix("TestDiffusionSmall", "results");
+        solver.SetOutputDirectoryAndPrefix("TestDiffusionSmall3", "results");
         solver.SetOutputToVtk(true);
         solver.SetOutputToTxt(true);
         solver.SetPrintingTimestepMultiple(1);
@@ -115,10 +120,31 @@ public:
         Vec solution = solver.Solve();
         ReplicatableVector solution_repl(solution);
 
+        // Get the middle node, and check it corresponds to a node in the very centre of the domain
+        const unsigned middle_node_idx = (num_nodes * num_nodes * num_nodes - 1u) / 2u;
+        TS_ASSERT_DELTA(mesh.GetNode(middle_node_idx)->rGetLocation()[0], 30.0, 1e-12);
+        TS_ASSERT_DELTA(mesh.GetNode(middle_node_idx)->rGetLocation()[1], 30.0, 1e-12);
+        TS_ASSERT_DELTA(mesh.GetNode(middle_node_idx)->rGetLocation()[2], 30.0, 1e-12);
+
+        auto output_dir = FileFinder("TestDiffusionSmall3", RelativeTo::ChasteTestOutput);
+
+        auto hdf5_reader = Hdf5DataReader(output_dir, "results", "Data");
+
+        const std::vector<double> time_values = hdf5_reader.GetUnlimitedDimensionValues();
+        const std::vector<double> soln_values = hdf5_reader.GetVariableOverTime("Variable_0", middle_node_idx);
+        TS_ASSERT_EQUALS(time_values.size(), 1001ul);
+        TS_ASSERT_EQUALS(soln_values.size(), 1001ul);
+
+        for (unsigned i = 0; i < time_values.size(); ++i)
+        {
+            std::cout << time_values.at(i) << ", " << soln_values.at(i) << '\n';
+        }
+
         // All PETSc vectors should be destroyed when they are no longer needed.
         PetscTools::Destroy(initial_condition);
         PetscTools::Destroy(solution);
     }
+
 };
 
 #endif /*_TEST_DIFFUSION_SMALL_HPP_*/
