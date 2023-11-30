@@ -4,7 +4,7 @@ See also https://github.com/Chaste/Chaste/issues/166.
 
 ## General Comments
 
-* All of the unit tests, as currently specified, are unnecessarily ambiguous. One way to help minimise this ambiguity would be to ask for the Physicell code to be uploaded to the github repo, since Physicell results are included in more results figures than any other tool; of course, ideally, all tools would provide their code for each unit test. Can Arnau ask the Physicell team to provide their code, in the first instance?
+* All of the unit tests, as currently specified, are unnecessarily ambiguous. Physicell results are included in more results figures than any other tool and the code for their results is here: https://github.com/PerMedCoE/observatory_benchmark/tree/main/multiscale_benchmark/2022_09_hackathon/Physicell
  
 ## Cell Cycle - Fixed Duration
 
