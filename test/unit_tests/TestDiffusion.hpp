@@ -74,8 +74,8 @@ public:
         const double vox_size = width_xyz / (num_nodes - 1u);
         const double initial_concentration = 0.0; // no concentration initially
         const double source_strength = 10.0; // constant concentration on the boundary
-        const double sink_strength = 2000.0; // 20 microMol per 0.01 minute
-        const double sink_square_radius = 1e-6; // sink-size, diameter in inf norm
+        const double sink_strength = 20.0; // 20 microMol per minute
+        const double sink_square_radius = 10.0; // sink-size, diameter in inf norm
         const double diffusion_coefficient = 2000.0; // 2000 micrometer^2 per minute
 
         // Create a 60 by 60 by 60 mesh in 3D. The first parameter is the cartesian space-step and the
@@ -165,10 +165,10 @@ public:
         const double vox_size = width_xyz / (num_pts_each_dim - 1u);
         const double initial_concentration = 0.0; // no concentration initially
         const double source_strength = 10.0; // constant concentration on the boundary
-        const double sink_strength = 2000.0; // 20 microMol per 0.01 minute
+        const double sink_strength = 20.0; // 20 microMol per minute
         const double diffusion_coefficient = 2000.0; // 2000 micrometer^2 per minute
 
-        const double sink_square_radius = 1e-6; // sink-size, diameter in inf norm
+        const double sink_square_radius = 10.0; // sink-size, diameter in inf norm
 
         const std::size_t num_nodes = 12ul * 12ul * 12ul;
 
