@@ -37,14 +37,15 @@ print(popt)
 
 ## Diffusion - Single Cell Sink
 
-* We are working towards an implementation of this unit test in Chaste.
-* The unit test specification does not unambiguously define the initial condition. Should c(x, 0) be 10 everywhere in the domain, 0 everywhere in the domain, or 10 everywhere in the domain except at the very centre? What is the spatial extent of the sink term? What discretization is required in the case of FEM? These aren't clear as currently described.
-* There is no definition of \lamba (= 20uM/0.01min) in the unit test - what is this parameter? It might be helpful to spell out the unit test mathematically.
+[results data file](results/diffusion-single-cell/TestDiffusionSmall03.dat)
+
+Concentration at the centre, over time.
 
 ## Diffusion - 1k Cells as Sinks
 
-* We are working towards an implementation of this unit test in Chaste.
-* Similar issues to those raised above.
+[results data file](results/diffusion-1k-cells/TestDiffusionSmall12.dat)
+
+Average concentration across all 12x12x12 points, over time.
   
 ## Mechanics - Movement of a Cell with Friction
 
