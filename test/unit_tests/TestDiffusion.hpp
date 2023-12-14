@@ -40,6 +40,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BoundaryConditionsContainer.hpp"
 #include "ConstBoundaryCondition.hpp"
+#include "ColumnDataWriter.hpp"
 #include "FileFinder.hpp"
 #include "Hdf5DataReader.hpp"
 #include "OutputFileHandler.hpp"
@@ -63,7 +64,7 @@ class TestDiffusion : public CxxTest::TestSuite
 {
 
 public:
-    void xTest3x3x3()
+    void Test3x3x3()
     {
         // Target number of nodes in each dimension, so we have num_nodes x num_nodes x num_nodes in the domain
         const unsigned num_nodes = 3;
@@ -84,8 +85,6 @@ public:
 
         // Custom PDE for this unit test
         DiffusionEquationWithSinkTerm<3> pde;
-
-
 
         pde.setUptake(sink_strength);
         pde.setSinkLocation(Create_c_vector(width_xyz / 2.0, width_xyz / 2.0, width_xyz / 2.0));
@@ -139,9 +138,16 @@ public:
         TS_ASSERT_EQUALS(time_values.size(), 1001ul);
         TS_ASSERT_EQUALS(soln_values.size(), 1001ul);
 
+        ColumnDataWriter data_writer("TestDiffusion", "TestDiffusionSmall03", false);
+        const int time_id_var = data_writer.DefineUnlimitedDimension("time","minutes");
+        const int sln_id_var = data_writer.DefineVariable("concentration", "uM");
+        data_writer.EndDefineMode();
+
         for (unsigned i = 0; i < time_values.size(); ++i)
         {
-            std::cout << time_values.at(i) << ", " << soln_values.at(i) << '\n';
+            data_writer.PutVariable(time_id_var, time_values.at(i));
+            data_writer.PutVariable(sln_id_var, soln_values.at(i));
+            data_writer.AdvanceAlongUnlimitedDimension();
         }
 
         // All PETSc vectors should be destroyed when they are no longer needed.
@@ -208,7 +214,7 @@ public:
 
         // Next define the start time, end time, and timestep, and set them.
         const double t_start = 0.0;
-        const double t_end = 1.0;
+        const double t_end = 10.0;
         const double dt = 0.01;
         solver.SetTimes(t_start, t_end);
         solver.SetTimeStep(dt);
@@ -235,6 +241,11 @@ public:
         TS_ASSERT_EQUALS(soln_values.size(), num_nodes);
         TS_ASSERT_EQUALS(soln_values.at(1).size(), num_timesteps);
 
+        ColumnDataWriter data_writer("TestDiffusion", "TestDiffusionSmall12", false);
+        const int time_id_var = data_writer.DefineUnlimitedDimension("time","minutes");
+        const int sln_id_var = data_writer.DefineVariable("average_concentration", "uM");
+        data_writer.EndDefineMode();
+
         for (unsigned i = 0; i < time_values.size(); ++i)
         {
             double average_solution = 0.0;
@@ -242,17 +253,17 @@ public:
             {
                 average_solution += soln_values.at(j).at(i);
             }
-            average_solution /= soln_values.size();
+            average_solution /= static_cast<double>(soln_values.size());
 
-
-            std::cout << time_values.at(i) << ", " << average_solution << '\n';
+            data_writer.PutVariable(time_id_var, time_values.at(i));
+            data_writer.PutVariable(sln_id_var, average_solution);
+            data_writer.AdvanceAlongUnlimitedDimension();
         }
 
         // All PETSc vectors should be destroyed when they are no longer needed.
         PetscTools::Destroy(initial_condition);
         PetscTools::Destroy(solution);
     }
-
 };
 
 #endif /*_TEST_DIFFUSION_SMALL_HPP_*/
