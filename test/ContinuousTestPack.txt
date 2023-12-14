@@ -1,5 +1,6 @@
 unit_tests/TestFixedDurationCellCycle.hpp
 unit_tests/TestStochasticDurationCellCycle.hpp
+unit_tests/TestChemotaxis.hpp
 unit_tests/TestDiffusion.hpp
 unit_tests/TestCellMovementWithFriction.hpp
 unit_tests/TestMechanicsPushing.hpp
