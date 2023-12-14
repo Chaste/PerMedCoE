@@ -4,5 +4,6 @@ unit_tests/TestChemotaxis.hpp
 unit_tests/TestDiffusion.hpp
 unit_tests/TestCellMovementWithFriction.hpp
 unit_tests/TestMechanicsPushing.hpp
+use_cases/Test2DMonolayerWithoutDiffusion.hpp
 TestDiffusionEquationWithSinkTerm.hpp
 TestDiffusionEquationWithSinkTerms.hpp
