@@ -64,6 +64,21 @@ print(popt)
 
 ## Use Case - 2D Monolayer without Diffusion
 
+* Now implemented in Chaste
+* Results available in tissuewidth.dat. Format is `time    min_x, max_x, tissue_diameter, number_of_cells`
+
+### Single Cell
+![results](results/2d-monolayer-without-diffusion/single-cell/tissue-diameter.png)
+![results](results/2d-monolayer-without-diffusion/single-cell/number-of-cells.png)
+
+Tissue exhibits an initial period of faster than linear growth, before reaching a linear stage in agreement with the provided data. Absolute values for tissue diameter are comparable.
+
+### Multiple Cells
+![results](results/2d-monolayer-without-diffusion/multiple-cells/tissue-diameter.png)
+![results](results/2d-monolayer-without-diffusion/multiple-cells/number-of-cells.png)
+
+Tissue exhibits linear growth and comparable growth rate.
+
 ## Use Case - Spheroid without Diffusion
 
 ## Use Case - Spheroid with Diffusion
