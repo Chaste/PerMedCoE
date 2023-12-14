@@ -69,7 +69,7 @@ void TissueWidthWriter<ELEMENT_DIM, SPACE_DIM>::VisitAnyPopulation(AbstractCellP
     }
     double tissue_width = (max_width - min_width)*20 + 10; // outputs tissue diameter in um and the number of cells
     unsigned int num_cells = pCellPopulation->GetNumRealCells();
-    *this->mpOutStream << min_width << "," << max_width << "," << tissue_width << num_cells << "\n";
+    *this->mpOutStream << min_width << "," << max_width << "," << tissue_width << "," << num_cells << "\n";
     std::cout << "Tissue diameter: " << tissue_width << "    Number of Cells: " << num_cells << "\n";
 }
 
