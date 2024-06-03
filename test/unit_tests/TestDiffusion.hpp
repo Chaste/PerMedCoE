@@ -64,7 +64,7 @@ class TestDiffusion : public CxxTest::TestSuite
 {
 
 public:
-    void noTest3x3x3()
+    void Test3x3x3()
     {
         // Target number of nodes in each dimension, so we have num_nodes x num_nodes x num_nodes in the domain
         const unsigned num_nodes = 3; // So 3x3x3 voxels one around each node. 
