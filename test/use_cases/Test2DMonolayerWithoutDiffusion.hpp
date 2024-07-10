@@ -117,7 +117,7 @@ public:
      */
     void Test2DMonolayerWithoutDiffusionSingleCell()
     {
-        static const double end_time = 28*24; // 14 days
+        static const double end_time = 28*24; // 28 days first 14 days and second 14 days can be separated 
 
 
         NodesOnlyMesh<2>* p_mesh = new NodesOnlyMesh<2>;
@@ -163,7 +163,7 @@ public:
      * Simulate growth of a tissue monolayer without diffusion. Starts with a tissue of diameter
      * of 57 cells.
      */
-    void noTest2DMonolayerWithoutDiffusionMultipleCells()
+    void Test2DMonolayerWithoutDiffusionMultipleCells()
     {
         double end_time = 14*24; // Now run for 14 days
         double initial_tissue_radius = 57; // initial radius
