@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2005-2021, University of Oxford.
+Copyright (c) 2005-2022, University of Oxford.
 All rights reserved.
 
 University of Oxford means the Chancellor, Masters and Scholars of the
@@ -33,20 +33,58 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "Hello.hpp"
-#include "Exception.hpp"
+#ifndef _DIFFUSIONEQUATIONWITHUNIFORMSINKTERM_HPP_
+#define _DIFFUSIONEQUATIONWITHUNIFORMSINKTERM_HPP_
 
-Hello::Hello(const std::string& rMessage)
-    : mMessage(rMessage)
-{
-}
+#include "AbstractLinearParabolicPde.hpp"
 
-std::string Hello::GetMessage()
+/**
+ * A simple parabolic PDE with a uniform sink term
+ */
+template <int SPACE_DIM>
+class DiffusionEquationWithUniformSinkTerm : public AbstractLinearParabolicPde<SPACE_DIM>
 {
-    return mMessage;
-}
 
-void Hello::Complain(const std::string& rComplaint)
-{
-    EXCEPTION(rComplaint);
-}
+private:
+    double mUptake = 1.0;
+    double mDiffusionCoefficient = 1.0;
+
+public:
+    double ComputeSourceTerm(const ChastePoint<SPACE_DIM>& rX, double, Element<SPACE_DIM, SPACE_DIM>*)
+    {
+        return -mUptake;
+    }
+
+    c_matrix<double, SPACE_DIM, SPACE_DIM> ComputeDiffusionTerm(const ChastePoint<SPACE_DIM>&,
+                                                                Element<SPACE_DIM, SPACE_DIM>* pElement = NULL)
+    {
+        return mDiffusionCoefficient * identity_matrix<double>(SPACE_DIM);
+    }
+
+    double ComputeDuDtCoefficientFunction(const ChastePoint<SPACE_DIM>&)
+    {
+        return 1;
+    }
+
+    double getUptake() const
+    {
+        return mUptake;
+    }
+
+    void setUptake(double uptake)
+    {
+        DiffusionEquationWithUniformSinkTerm::mUptake = uptake;
+    }
+   
+    double getDiffusionCoefficient() const
+    {
+        return mDiffusionCoefficient;
+    }
+
+    void setDiffusionCoefficient(double diffusionCoefficient)
+    {
+        DiffusionEquationWithUniformSinkTerm::mDiffusionCoefficient = diffusionCoefficient;
+    }
+};
+
+#endif //_DIFFUSIONEQUATIONWITHUNIFORMSINKTERM_HPP_

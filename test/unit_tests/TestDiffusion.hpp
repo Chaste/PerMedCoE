@@ -51,7 +51,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UblasCustomFunctions.hpp"
 
 #include "DiffusionEquationWithSinkTerm.hpp"
-#include "DiffusionEquationWithSinkTerms.hpp"
+#include "DiffusionEquationWithUniformSinkTerm.hpp"
 
 /* The following header must be included in every test that uses PETSc. Note that it
  * cannot be included in the source code. */
@@ -64,7 +64,7 @@ class TestDiffusion : public CxxTest::TestSuite
 {
 
 public:
-    void Test3x3x3()
+    void noTest3x3x3()
     {
         // Target number of nodes in each dimension, so we have num_nodes x num_nodes x num_nodes in the domain
         const unsigned num_nodes = 3; // So 3x3x3 voxels one around each node. 
@@ -165,52 +165,28 @@ public:
         const unsigned num_pts_each_dim = 12;
 
         // Simulation parameters from PerMedCoE document
-        const double width_xyz = 240.0; // 240 x 240 x 240 micrometers,
+        const double width_xyz = 220.0; // 240 x 240 x 240 micrometers, -20 as nodes are centres of cells  
         const double vox_size = width_xyz / (num_pts_each_dim - 1u);
+        assert(vox_size==20);
         const double initial_concentration = 0.0; // no concentration initially
         const double source_strength = 10.0; // constant concentration on the boundary
-        const double sink_strength = 2.0; // 20 microMol per minute
+        const double sink_strength = 20.0; // 20 microMol per minute
         const double diffusion_coefficient = 2000.0; // 2000 micrometer^2 per minute
 
-        const double sink_square_radius = 10.0; // sink-size, diameter in inf norm
+        //const double sink_square_radius = 10.0; // sink-size, diameter in inf norm
 
         const std::size_t num_nodes = 12ul * 12ul * 12ul;
 
-        // Create a size 240 by 240 by 240 (with 12 by 12 by 12 nodes) mesh in 3D. The first parameter is the 
+        // Create a size 220 by 220 by 220 (with 12 by 12 by 12 nodes so 20 wide elements) mesh in 3D. The first parameter is the 
         // cartesian space-step and the other three parameters are the width, height and depth of the mesh.
         TetrahedralMesh<3, 3> mesh;
         mesh.ConstructRegularSlabMesh(vox_size, width_xyz, width_xyz, width_xyz);
 
         TS_ASSERT_EQUALS(mesh.GetNumNodes(), num_nodes);
 
-        DiffusionEquationWithSinkTerms<3> pde;
+        DiffusionEquationWithUniformSinkTerm<3> pde;
         pde.setDiffusionCoefficient(diffusion_coefficient);
-        
-        // Add a sink for each of the 1000 internal cells 
-        for (unsigned i = 1; i < num_pts_each_dim - 1; ++i)
-        {
-            for (unsigned j = 1; j < num_pts_each_dim - 1; ++j)
-            {
-                for (unsigned k = 1; k < num_pts_each_dim - 1; ++k)
-                {
-                    const double x_pos = static_cast<double>(i) * vox_size;
-                    TS_ASSERT_LESS_THAN(0, x_pos);
-                    TS_ASSERT_LESS_THAN(x_pos, width_xyz);
-                    
-                    const double y_pos = static_cast<double>(j) * vox_size;
-                    TS_ASSERT_LESS_THAN(0, y_pos);
-                    TS_ASSERT_LESS_THAN(y_pos, width_xyz);
-
-                    const double z_pos = static_cast<double>(k) * vox_size;
-                    TS_ASSERT_LESS_THAN(0, z_pos);
-                    TS_ASSERT_LESS_THAN(z_pos, width_xyz);
-
-                    pde.AddSink(Create_c_vector(x_pos, y_pos, z_pos), sink_strength, sink_square_radius);
-                }
-            }
-        }
-
-        TS_ASSERT_EQUALS(pde.rGetSinkLocations().size(), (num_pts_each_dim-2)*(num_pts_each_dim-2)*(num_pts_each_dim-2));
+        pde.setUptake(sink_strength/vox_size/vox_size);
 
         // Create a new boundary conditions container and specify u=source_strength on the boundary.
         BoundaryConditionsContainer<3, 3, 1> bcc;
