@@ -50,9 +50,11 @@ private:
     double mDiffusionCoefficient = 1.0;
 
 public:
-    double ComputeSourceTerm(const ChastePoint<SPACE_DIM>& rX, double, Element<SPACE_DIM, SPACE_DIM>*)
+    double ComputeSourceTerm(const ChastePoint<SPACE_DIM>& rX,
+                             double u,
+                             Element<SPACE_DIM, SPACE_DIM>*)
     {
-        return -mUptake;
+        return -mUptake*u;
     }
 
     c_matrix<double, SPACE_DIM, SPACE_DIM> ComputeDiffusionTerm(const ChastePoint<SPACE_DIM>&,
