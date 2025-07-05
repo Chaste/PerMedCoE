@@ -4,7 +4,7 @@ close all
 load('../../../../testoutput/TestMechanicsPushing/results_from_time_0/results.viznodelocations')
 %load('results.viznodelocations')
 
-separation = results(:,5)-results(:,2);
+separation = results(:,5)-results(:,2)
 
 plot(results(:,1)*60,separation,'r.')
 hold on
