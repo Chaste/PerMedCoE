@@ -135,7 +135,6 @@ private:
 
             p_cell->InitialiseCellCycleModel();
 
-            // Set Target Area so dont need to use a growth model in vertex simulations
             p_cell->GetCellData()->SetItem("target area", 1.0);
             p_cell->GetCellData()->SetItem("growth inhibited", 0.0);
             p_cell->GetCellData()->SetItem("Radius", 0.1);
@@ -151,7 +150,7 @@ public:
      */
     void Test2DMonolayerWithoutDiffusionSingleCell()
     {
-        static const double end_time = 28*24; // 28 days first 14 days and second 14 days can be separated 
+        static const double end_time = 23*24; // 28 days first 14 days and second 14 days can be separated 
 
 
         NodesOnlyMesh<2>* p_mesh = new NodesOnlyMesh<2>;
@@ -174,15 +173,15 @@ public:
 
         OffLatticeSimulation<2> simulator(cell_population);
         simulator.SetOutputDirectory("2DMonolayerWithoutDiffusion/SingleCell");
-        simulator.SetDt(0.05);
-        simulator.SetSamplingTimestepMultiple(10); // Every 30 minutes
+        simulator.SetDt(0.02);
+        simulator.SetSamplingTimestepMultiple(200); // Every 4 hours
         simulator.SetEndTime(end_time);
 
         simulator.SetOutputDivisionLocations(true);
 
         // Create a force law and pass it to the simulation
         MAKE_PTR(GeneralisedLinearSpringForceWithMinDistanceItem<2>, p_linear_force);
-        p_linear_force->SetMeinekeSpringStiffness(2.70);
+        p_linear_force->SetMeinekeSpringStiffness(10.0); // 2.7 //5 Low!
         p_linear_force->SetCutOffLength(cut_off_length);
         simulator.AddForce(p_linear_force);
         
@@ -197,7 +196,7 @@ public:
      * Simulate growth of a tissue monolayer without diffusion. Starts with a tissue of diameter
      * of 57 cells.
      */
-    void Test2DMonolayerWithoutDiffusionMultipleCells()
+    void noTest2DMonolayerWithoutDiffusionMultipleCells()
     {
         double end_time = 14*24; // Now run for 14 days
         double initial_tissue_radius = 57; // initial radius

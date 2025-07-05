@@ -67,19 +67,28 @@ void FixedDurationCellCycleModelWithGrowthInhibition::ResetForDivision()
 
 void FixedDurationCellCycleModelWithGrowthInhibition::SetPhaseDurations()
 {
-    SetStemCellG1Duration(7.0);  
-    SetTransitCellG1Duration(7.0);
-    SetSDuration(6.0);
-    SetG2Duration(3.0);
-    SetMDuration(2.0);
-    SetMinimumGapDuration(3.0);
+    // SetStemCellG1Duration(7.0);  
+    // SetTransitCellG1Duration(7.0);
+    // SetSDuration(6.0);
+    // SetG2Duration(3.0);
+    // SetMDuration(2.0);
+    // SetMinimumGapDuration(3.0);
+
+    SetStemCellG1Duration(6.0); //5.7  
+    SetTransitCellG1Duration(6.);
+    SetSDuration(1.5);
+    SetG2Duration(1.0);
+    SetMDuration(1.0);
+    SetMinimumGapDuration(1.0);
+
 }
 
 void FixedDurationCellCycleModelWithGrowthInhibition::SetG1Duration()
 {
     assert(mpCell != NULL);  // Make sure cell exists
 
-    mG1Duration = 7.0;
+    //mG1Duration = 7.0;
+    mG1Duration = 6.0;
 }
 
 AbstractCellCycleModel* FixedDurationCellCycleModelWithGrowthInhibition::CreateCellCycleModel()

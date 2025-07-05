@@ -45,11 +45,13 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CellsGenerator.hpp"
 #include "ConstantVelocityForce.hpp"
 #include "GeneralisedLinearSpringForce.hpp"
+#include "RepulsionForce.hpp"
 #include "NoCellCycleModel.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "NodeLocationWriter.hpp"
 #include "NodesOnlyMesh.hpp"
 #include "OffLatticeSimulation.hpp"
+#include "StoppingVelocityModifier.hpp"
 
 // PETSc must be initialized to solve linear algebra problems in Chaste.
 // For sequential code, FakePetscSetup.hpp starts PETSc on a single rank.
@@ -67,8 +69,8 @@ public:
 
         // Simulation options
         const std::string output_directory = "TestMechanicsPushing";
-        const double sim_end_time_h = 10.0 * (1.0 / 60.0); // total 10 min runtime (in hours)
-        const double sim_dt_min = 0.1; // 0.1 min per timestep (in minutes)
+        const double sim_end_time_h = 5.0 * (1.0 / 60.0); // total 10 min runtime (in hours)
+        const double sim_dt_min = 0.01; // 0.1 min per timestep (in minutes) // Chosen to be small to capture the turn off of applied force.
         const double sim_dt_h = sim_dt_min * (1.0 / 60.0); // 0.1 min per timestep (in hours)
         const unsigned int sim_sampling = 1; // output every timestep
 
@@ -110,6 +112,10 @@ public:
         // Create an off-lattice simulation with the cell population
         OffLatticeSimulation<3> simulator(cell_population);
 
+        MAKE_PTR(StoppingVelocityModifier<3>, p_modifier);
+        p_modifier->SetMinSeparation(0.9); // 0.9 separation for stopping velocity
+        simulator.AddSimulationModifier(p_modifier);
+
         // Set simulation options
         simulator.SetOutputDirectory(output_directory);
         simulator.SetEndTime(sim_end_time_h); 
@@ -121,7 +127,7 @@ public:
         simulator.AddForce(p_constant_force);
 
         // Add a generalised linear spring force law
-        auto p_spring_force = boost::make_shared<GeneralisedLinearSpringForce<3> >();
+        auto p_spring_force = boost::make_shared<RepulsionForce<3> >();
         p_spring_force->SetMeinekeSpringStiffness(30.0); // Cells push past each other at default 15.0
         simulator.AddForce(p_spring_force);
 
