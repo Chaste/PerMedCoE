@@ -34,6 +34,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "GeneralisedLinearSpringForceWithMinDistanceItem.hpp"
+#include "AbstractCentreBasedCellPopulation.hpp"
+#include "MeshBasedCellPopulation.hpp"
+#include "NodeBasedCellPopulation.hpp"
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 GeneralisedLinearSpringForceWithMinDistanceItem<ELEMENT_DIM,SPACE_DIM>::GeneralisedLinearSpringForceWithMinDistanceItem()

@@ -127,7 +127,7 @@ public:
         simulator.AddForce(p_constant_force);
 
         // Add a generalised linear spring force law
-        auto p_spring_force = boost::make_shared<RepulsionForce<3> >();
+        auto p_spring_force = boost::make_shared<SimpleLogarithmicRepulsionForce<3> >();
         p_spring_force->SetMeinekeSpringStiffness(30.0); // Cells push past each other at default 15.0
         simulator.AddForce(p_spring_force);
 

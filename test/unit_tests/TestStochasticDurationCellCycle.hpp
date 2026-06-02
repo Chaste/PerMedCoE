@@ -123,7 +123,7 @@ public:
         simulator.AddCellPopulationBoundaryCondition(pBoundaryCondition);
 
         // Add force for cell movement
-         MAKE_PTR(RepulsionForce<3>, pForce);
+         MAKE_PTR(SimpleLogarithmicRepulsionForce<3>, pForce);
          simulator.AddForce(pForce);
 
         // Add simulation modifiers

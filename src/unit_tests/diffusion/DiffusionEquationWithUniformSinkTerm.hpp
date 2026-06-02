@@ -39,7 +39,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractLinearParabolicPde.hpp"
 
 /**
- * A simple parabolic PDE with a uniform sink term
+ * A simple parabolic PDE with a uniform sink term -a*u
  */
 template <int SPACE_DIM>
 class DiffusionEquationWithUniformSinkTerm : public AbstractLinearParabolicPde<SPACE_DIM>

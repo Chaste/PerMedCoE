@@ -44,6 +44,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SmartPointers.hpp"
 #include "VoronoiDataWriter.hpp"
 #include "NodeLocationWriter.hpp"
+#include "NodeVelocityWriter.hpp"
 #include "AbstractCellBasedTestSuite.hpp"
 #include "PetscSetupAndFinalize.hpp"
 #include "CellsGenerator.hpp"
@@ -65,9 +66,8 @@ public:
 /*
  * 1 unit in Chaste is ~ 1 cell width/10um
  * The cell should move with an initial velocity of 10um/minute, i.e. 1 cell width/minute
- * Timestep is 0.1 minutes, i.e. 10 steps/cell width
- * Total time = 10mins, i.e. 10 cell widths of movement without friction
-*/
+ * Total time = 12s, 
+ */
     void TestCellMechanicsCellMovement() {
 
       // Generate a mesh
@@ -85,15 +85,21 @@ public:
       // Expressed in units of simulation units/hour
       // Assuming 1 unit = 10um
       c_vector<double, 2> initialVelocity;
-      initialVelocity[0] = 600.0;
+      initialVelocity[0] = 20.0;
       initialVelocity[1] = 0.0;
+
+      double velocity_start_time = 3;
+      double velocity_end_time = 6;
 
       MAKE_PTR(InstantaneousVelocityForce<2>, force);
       force->SetVelocity(initialVelocity);
+      force->SetStartTime(velocity_start_time);
+      force->SetEndTime(velocity_end_time);
 
       // Setup cell population
       NodeBasedCellPopulation<2> cell_population(mesh, cells);
       cell_population.Update();
+      cell_population.SetDampingConstantNormal(7.2);
 
       // Add node location writer
       using LocationWriter = NodeLocationWriter<2, 2>;
@@ -101,21 +107,27 @@ public:
       writer->SetFileName("node_locations.dat");
       cell_population.AddPopulationWriter(writer);
 
+      using VelocitiyWriter = NodeVelocityWriter<2, 2>;
+      MAKE_PTR(VelocitiyWriter, velocities_writer);
+      velocities_writer->SetFileName("cell_velocities.dat");
+      cell_population.AddPopulationWriter(velocities_writer);
+
+
       // Set up simulator
       OffLatticeSimulation<2> simulator(cell_population);
-      simulator.SetOutputDirectory("PerMedCoE");
-      simulator.SetEndTime(1.0 / 6.0); // 10 mins expressed in hours
-      simulator.SetDt(1.0 / (60.0 * 10.0)); // 0.1 mins expressed in hours
+      simulator.SetOutputDirectory("PerMedCoE/TestCellMovementWithFriction");
+      simulator.SetEndTime(12); // 12 seconds
+      simulator.SetDt(0.1); // 0.1 seconds, so 120 time steps in total
+      simulator.SetSamplingTimestepMultiple(2); // output every 0.1 second      
       simulator.AddForce(force);
 
       // Perform simulation
-      simulator.Solve();
+      simulator.Solve();  
 
-      // Write the results
-      std::string output_directory = "PerMedCoE";
-      OutputFileHandler output_file_handler(output_directory, false);
-      cell_population.OpenWritersFiles(output_file_handler);
-      cell_population.WriteResultsToFiles(output_directory);
+      // Check that the cell has moved approximately the right distance (we expect it to move 3 cell widths in total, as the velocity is 1 cell width/minute for 3 minutes, and 1 unit = 1 cell width)
+      c_vector<double, 2> final_location = cell_population.GetNode(0)->rGetLocation();
+      double distance_moved = sqrt(final_location[0]*final_location[0] + final_location[1]*final_location[1]);
+      TS_ASSERT_DELTA(distance_moved, 8.3333, 0.01); 
     }
 };
 

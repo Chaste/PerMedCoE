@@ -3,7 +3,10 @@ unit_tests/TestStochasticDurationCellCycle.hpp
 unit_tests/TestChemotaxis.hpp
 unit_tests/TestDiffusion.hpp
 unit_tests/TestDiffusionSimple.hpp
+unit_tests/TestDiffusionSimple3d.hpp
+unit_tests/TestDiffusionWithCells.hpp
 unit_tests/TestCellMovementWithFriction.hpp
+unit_tests/TestCellsRelaxation.hpp
 unit_tests/TestMechanicsPushing.hpp
 use_cases/Test2DMonolayerWithoutDiffusion.hpp
 TestDiffusionEquationWithSinkTerm.hpp

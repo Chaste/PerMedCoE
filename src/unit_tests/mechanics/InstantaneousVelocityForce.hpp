@@ -39,34 +39,45 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template <unsigned int DIM>
 class InstantaneousVelocityForce : public AbstractForce<DIM> {
     private:
-        c_vector<double, DIM> velocity;
+        c_vector<double, DIM> mVelocity;
+        double mStartTime = 0.0;
+        double mEndTime = 0.0;
 
     public:
         // Default constructor
         InstantaneousVelocityForce() {
             for (unsigned int i = 0; i < DIM; i++) {
-                velocity[i] = 0.0;
+                mVelocity[i] = 0.0;
             }
+            mStartTime = 0.0;
+            mEndTime = 0.0;
         }
         
         // Constructor with velocity
-        InstantaneousVelocityForce(const c_vector<double, DIM> velocity) : velocity(velocity) {};
+        InstantaneousVelocityForce(const c_vector<double, DIM> velocity) : mVelocity(velocity) {};
     
         void SetVelocity(const c_vector<double, DIM> velocity) {
             for (unsigned int i = 0; i < DIM; i++) {
-                this->velocity[i] = velocity[i];
+                this->mVelocity[i] = velocity[i];
             }
+        }
+
+        void SetStartTime(double start_time) {
+            this->mStartTime = start_time;
+        }
+
+        void SetEndTime(double end_time) {
+            this->mEndTime = end_time;
         }
 
         void AddForceContribution(AbstractCellPopulation<DIM>& cellPopulation) override {
 
-            // Only apply the force if this is the first timestep
-            const unsigned int stepsElapsed = SimulationTime::Instance()->GetTimeStepsElapsed();
-
-            if (stepsElapsed == 0) {
+            // Only apply the force in the interval [mStartTime, mEndTime]
+            if (SimulationTime::Instance()->GetTime() >= mStartTime && SimulationTime::Instance()->GetTime() < mEndTime) 
+            {
                 // Apply the force
                 for (unsigned int i = 0; i < cellPopulation.GetNumNodes(); i++) {
-                    cellPopulation.GetNode(i)->AddAppliedForceContribution(velocity);
+                    cellPopulation.GetNode(i)->AddAppliedForceContribution(mVelocity);
                 }
             }
         }

@@ -43,7 +43,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using boost::numeric::ublas::norm_inf;
 
 /**
- * A simple parabolic Diffusion-equation PDE with multiple sink terms.
+ * A simple parabolic Diffusion-equation PDE with multiple sink terms. -a deleta(r,ri)
+ * 
  */
 template <int SPACE_DIM>
 class DiffusionEquationWithSinkTerms : public AbstractLinearParabolicPde<SPACE_DIM>
@@ -56,14 +57,23 @@ private:
     double mDiffusionCoefficient = 1.0;
 
 public:
-    [[nodiscard]] double ComputeSourceTerm(const ChastePoint<SPACE_DIM>& rX, double, Element<SPACE_DIM, SPACE_DIM>*)
+    [[nodiscard]] double ComputeSourceTerm(const ChastePoint<SPACE_DIM>& rX, double, Element<SPACE_DIM, SPACE_DIM>* pElement)
     {
         for (unsigned i = 0; i < mSinkLocations.size(); ++i)
         {
-            if (norm_inf(rX.rGetLocation() - mSinkLocations[i]) <= mSinkRadii[i])
+            // if (norm_inf(rX.rGetLocation() - mSinkLocations[i]) <= mSinkRadii[i])
+            // {
+            //     return -mSinkStrengths[i];
+            // }
+            if (pElement->IncludesPoint(mSinkLocations[i]))
             {
-                return -mSinkStrengths[i];
+                //double element_volume = pElement->GetVolume();
+                
+                double sink_strength_per_unit_volume = mSinkStrengths[i];/// element_volume;
+                
+                return -sink_strength_per_unit_volume;
             }
+
         }
 
         return 0.0;
