@@ -52,6 +52,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NodeLocationWriter.hpp"
 #include "NodesOnlyMesh.hpp"
 #include "OffLatticeSimulation.hpp"
+#include "RandomNumberGenerator.hpp"
 #include "StoppingVelocityModifier.hpp"
 
 // PETSc must be initialized to solve linear algebra problems in Chaste.
@@ -69,56 +70,70 @@ public:
         EXIT_IF_PARALLEL;
 
         // Simulation options
-        const std::string output_directory = "PerMedCoE/TestCellRelaxation";
         const double sim_end_time = 10; // total 10 min runtime (in hours)
-        const double sim_dt = 0.1; // 0.1 min per timestep (in minutes) // Chosen to be small to capture the turn off of applied force.
         const unsigned int sim_sampling = 1; // output every timestep
+        const std::vector<double> sim_dt_values = {1.0, 0.5, 0.25, 0.125, 0.0625, 1.0/120.0};
+        const std::vector<std::string> output_suffixes = {"1", "05", "025", "0125", "00625", "1_120"};
 
-        // Create two 3D nodes
-        // Length is dimensionless and based on typical cell diameter i.e. approx 10 um
-        // Cell centres are initially 30 um apart
-        std::vector<double> coords = {0.0, 0.0, 0.0};
-        auto p_node_0 = std::make_unique<Node<3> >(0u, coords, false);
+        for (unsigned i = 0; i < sim_dt_values.size(); ++i)
+        {
+          // Reset global singletons so each sweep point runs from a clean state.
+          SimulationTime::Destroy();
+          SimulationTime::Instance()->SetStartTime(0.0);
+          RandomNumberGenerator::Instance()->Reseed(0);
 
-        coords[0] = 0.9;
-        auto p_node_1 = std::make_unique<Node<3> >(1u, coords, false);
+          const std::string output_directory = "PerMedCoE/TestCellRelaxation_dt_" + output_suffixes[i];
+          const double sim_dt = sim_dt_values[i];
 
-        std::vector<Node<3>*> nodes = {p_node_0.get(), p_node_1.get()};
+          // Create two 3D nodes
+          // Length is dimensionless and based on typical cell diameter i.e. approx 10 um
+          // Cell centres are initially 30 um apart
+          std::vector<double> coords = {0.0, 0.0, 0.0};
+          auto p_node_0 = std::make_unique<Node<3> >(0u, coords, false);
 
-        // Create a 3D nodes-only mesh with 15 um neighbour interaction distance.
-        double max_interaction_radius = 1.5;
-        NodesOnlyMesh<3> mesh;
-        mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
+          coords[0] = 0.9;
+          auto p_node_1 = std::make_unique<Node<3> >(1u, coords, false);
 
-        // Create the cells. These cells do not grow.
-        std::vector<CellPtr> cells;
-        CellsGenerator<NoCellCycleModel, 1> cells_generator;
-        cells_generator.GenerateBasic(cells, 2);
+          std::vector<Node<3>*> nodes = {p_node_0.get(), p_node_1.get()};
 
-        // Create a cell population to connect the mesh and cells
-        NodeBasedCellPopulation<3> cell_population(mesh, cells);
+          // Create a 3D nodes-only mesh with 15 um neighbour interaction distance.
+          double max_interaction_radius = 1.5;
+          NodesOnlyMesh<3> mesh;
+          mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
 
-        // Add a node location writer to the cell population
-        auto p_writer = boost::make_shared<NodeLocationWriter<3, 3> >();
-        cell_population.AddPopulationWriter(p_writer);
-        p_writer->SetFileName("node_locations.dat");
+          // Create the cells. These cells do not grow.
+          std::vector<CellPtr> cells;
+          CellsGenerator<NoCellCycleModel, 1> cells_generator;
+          cells_generator.GenerateBasic(cells, 2);
 
-        // Create an off-lattice simulation with the cell population
-        OffLatticeSimulation<3> simulator(cell_population);
+          // Create a cell population to connect the mesh and cells
+          NodeBasedCellPopulation<3> cell_population(mesh, cells);
 
-        // Set simulation options
-        simulator.SetOutputDirectory(output_directory);
-        simulator.SetEndTime(sim_end_time); 
-        simulator.SetDt(sim_dt);
-        simulator.SetSamplingTimestepMultiple(sim_sampling);
+          // Add a node location writer to the cell population
+          auto p_writer = boost::make_shared<NodeLocationWriter<3, 3> >();
+          cell_population.AddPopulationWriter(p_writer);
+          p_writer->SetFileName("node_locations.dat");
 
-        // Add a generalised linear spring force law
-        auto p_spring_force = boost::make_shared<RepulsionForce<3> >();
-        p_spring_force->SetMeinekeSpringStiffness(30.0/60.0); // scaled for minutes
-        simulator.AddForce(p_spring_force);
+          // Create an off-lattice simulation with the cell population
+          OffLatticeSimulation<3> simulator(cell_population);
 
-        // Run the simulation
-        simulator.Solve();
+          // Set simulation options
+          simulator.SetOutputDirectory(output_directory);
+          simulator.SetEndTime(sim_end_time);
+          simulator.SetDt(sim_dt);
+          simulator.SetSamplingTimestepMultiple(sim_sampling);
+
+          // Add a generalised linear spring force law
+          auto p_spring_force = boost::make_shared<RepulsionForce<3> >();
+          p_spring_force->SetMeinekeSpringStiffness(30.0/60.0); // scaled for minutes
+          simulator.AddForce(p_spring_force);
+
+          // Run the simulation
+          simulator.Solve();
+        }
+
+        SimulationTime::Destroy();
+        RandomNumberGenerator::Destroy();
     }
 
     void Test2CellsHertzRelaxation()
@@ -132,61 +147,76 @@ public:
 
         EXIT_IF_PARALLEL;
 
-        const std::string output_directory = "PerMedCoE/TestCellHertzRelaxation";
-        const double sim_end_time = 5*3600; // 5 hours in seconds (or chosen time unit)
-        const double sim_dt = 30;
+        const double sim_end_time = 3*3600; // 3 hours in seconds (or chosen time unit)
+        const double sim_dt = 3;
         const unsigned int sim_sampling = 10;
+        const std::vector<double> cell_drag_values = {0.01, 0.1, 1.0};
+        const std::vector<std::string> output_suffixes = {"001", "01", "1"};
 
-        // Two cells placed 9.0e-6 apart with radius 5.0e-6 each, so they overlap by 1.0e-6.
-        std::vector<double> coords = {0.0, 0.0, 0.0};
-        auto p_node_0 = std::make_unique<Node<3> >(0u, coords, false);
+        for (unsigned i = 0; i < cell_drag_values.size(); ++i)
+        {
+          // Reset global singletons so each sweep point runs from a clean state.
+          SimulationTime::Destroy();
+          SimulationTime::Instance()->SetStartTime(0.0);
+          RandomNumberGenerator::Instance()->Reseed(0);
 
-        coords[0] = 9e-6;
-        auto p_node_1 = std::make_unique<Node<3> >(1u, coords, false);
+          double cell_drag = cell_drag_values[i];
+          std::string output_directory = "PerMedCoE/TestCellHertzRelaxation_drag_" + output_suffixes[i];
 
-        std::vector<Node<3>*> nodes = {p_node_0.get(), p_node_1.get()};
+          // Two cells placed 9.0e-6 apart with radius 5.0e-6 each, so they overlap by 1.0e-6.
+          std::vector<double> coords = {0.0, 0.0, 0.0};
+          auto p_node_0 = std::make_unique<Node<3> >(0u, coords, false);
 
-        double max_interaction_radius = 15e-6;
-        NodesOnlyMesh<3> mesh;
-        mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
+          coords[0] = 9e-6;
+          auto p_node_1 = std::make_unique<Node<3> >(1u, coords, false);
 
-// Set node radius here
-        mesh.GetNode(0)->SetRadius(5e-6);
-        mesh.GetNode(1)->SetRadius(5e-6);
+          std::vector<Node<3>*> nodes = {p_node_0.get(), p_node_1.get()};
 
-        std::vector<CellPtr> cells;
-        CellsGenerator<NoCellCycleModel, 1> cells_generator;
-        cells_generator.GenerateBasic(cells, 2);
+          double max_interaction_radius = 15e-6;
+          NodesOnlyMesh<3> mesh;
+          mesh.ConstructNodesWithoutMesh(nodes, max_interaction_radius);
 
-        NodeBasedCellPopulation<3> cell_population(mesh, cells);
+          // Set node radius here
+          mesh.GetNode(0)->SetRadius(5e-6);
+          mesh.GetNode(1)->SetRadius(5e-6);
 
-        auto p_writer = boost::make_shared<NodeLocationWriter<3, 3> >();
-        cell_population.AddPopulationWriter(p_writer);
-        p_writer->SetFileName("node_locations.dat");
+          std::vector<CellPtr> cells;
+          CellsGenerator<NoCellCycleModel, 1> cells_generator;
+          cells_generator.GenerateBasic(cells, 2);
 
-        OffLatticeSimulation<3> simulator(cell_population);
-        simulator.SetOutputDirectory(output_directory);
-        simulator.SetEndTime(sim_end_time);
-        simulator.SetDt(sim_dt);
-        simulator.SetSamplingTimestepMultiple(sim_sampling);
+          NodeBasedCellPopulation<3> cell_population(mesh, cells);
+          cell_population.SetDampingConstantNormal(cell_drag);
 
-        // Add the Hertz contact force
-        // E* = 268.0 Pa; 
-        // gamma =8.56e-15 J/m^2
-        auto p_hertz_force = boost::make_shared<HertzForce<3> >();
-        p_hertz_force->SetEffectiveElasticModulus(268.0);
-        p_hertz_force->SetAdhesionParameter(8.56e-15);
-        simulator.AddForce(p_hertz_force);
+          auto p_writer = boost::make_shared<NodeLocationWriter<3, 3> >();
+          cell_population.AddPopulationWriter(p_writer);
+          p_writer->SetFileName("node_locations.dat");
 
-        simulator.Solve();
+          OffLatticeSimulation<3> simulator(cell_population);
+          simulator.SetOutputDirectory(output_directory);
+          simulator.SetEndTime(sim_end_time);
+          simulator.SetDt(sim_dt);
+          simulator.SetSamplingTimestepMultiple(sim_sampling);
 
-        // After relaxation the cells should have separated to (approximately)
-        // their combined rest radius (R_A + R_B = 10.0).
-        Node<3>* p_final_node_0 = cell_population.GetNode(0);
-        Node<3>* p_final_node_1 = cell_population.GetNode(1);
-        double final_separation = norm_2(p_final_node_1->rGetLocation()
-                                        - p_final_node_0->rGetLocation());
-        TS_ASSERT_LESS_THAN(9.9e-6, final_separation);  // cells have moved apart
+          // Add the Hertz contact force
+          // E* = 268.0 Pa;
+          // gamma = 8.56e-15 J/m^2
+          auto p_hertz_force = boost::make_shared<HertzForce<3> >();
+          p_hertz_force->SetEffectiveElasticModulus(268.0);
+          p_hertz_force->SetAdhesionParameter(8.56e-15);
+          simulator.AddForce(p_hertz_force);
+
+          simulator.Solve();
+
+          // After relaxation the cells should have separated.
+          Node<3>* p_final_node_0 = cell_population.GetNode(0);
+          Node<3>* p_final_node_1 = cell_population.GetNode(1);
+          double final_separation = norm_2(p_final_node_1->rGetLocation()
+                          - p_final_node_0->rGetLocation());
+          TS_ASSERT_LESS_THAN(9.9e-6, final_separation);  // cells have moved apart
+        }
+
+        SimulationTime::Destroy();
+        RandomNumberGenerator::Destroy();
     }
 };
 

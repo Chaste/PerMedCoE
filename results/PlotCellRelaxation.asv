@@ -1,0 +1,82 @@
+ 
+clear; close all;
+
+base_dir = '../../../output/PerMedCoE/';
+run_suffixes = {'1','05','025','0125','00625','1_120'};
+run_labels = {'dt = 1.0','dt = 0.5','dt = 0.25','dt = 0.125','dt = 0.0625','dt = 1/120'};
+run_colours = lines(numel(run_suffixes));
+initial_separation_um = NaN;
+
+hold on
+for i = 1:numel(run_suffixes)
+	run_dir = [base_dir,'TestCellRelaxation_dt_',run_suffixes{i},'/results_from_time_0/'];
+	data_file = [run_dir,'node_locations.dat'];
+
+	if exist(data_file,'file') ~= 2
+		warning(['Missing file: ',data_file]);
+		continue
+	end
+
+	position_data = load(data_file);
+	if isnan(initial_separation_um)
+		initial_separation_um = 10*(position_data(1,5)-position_data(1,2));
+	end
+	plot(position_data(:,1), 10*(position_data(:,5)-position_data(:,2)), '-', 'LineWidth', 1.5, ...
+		'Color', run_colours(i,:), 'DisplayName', run_labels{i})
+end
+
+if ~isnan(initial_separation_um)
+	b = 10;
+	a = 1;
+	t_exact = linspace(0, 10, 400);
+	y_exact = 1.0-((initial_separation_um/b).^(exp(a*t_exact)));
+	plot(t_exact, y_exact, 'k--', 'LineWidth', 1.8, 'DisplayName', 'Exact solution')
+else
+	warning('Exact solution not plotted because no dt data files were found.');
+end
+
+yline(10, 'k:', 'DisplayName', 'R_A + R_B')
+axis([0,5,8.9,10.1])
+legend('Location','best')
+
+title("Chaste Force Cell Separation")
+ylabel("Separation (um)")
+xlabel("Time (min)")
+SaveAsPngEpsAndFig(-1,'ChasteForceCellRelaxationSweep', 12, 7/5, 12)
+
+
+figure 
+
+base_dir = '../../../output/PerMedCoE/';
+run_suffixes = {'001','01','1'};
+run_labels = {'drag = 0.01','drag = 0.1','drag = 1.0'};
+run_colours = lines(numel(run_suffixes));
+
+hold on
+for i = 1:numel(run_suffixes)
+	run_dir = [base_dir,'TestCellHertzRelaxation_drag_',run_suffixes{i},'/results_from_time_0/'];
+	data_file = [run_dir,'node_locations.dat'];
+
+	if exist(data_file,'file') ~= 2
+		warning(['Missing file: ',data_file]);
+		continue
+	end
+
+	position_data = load(data_file);
+	plot(position_data(:,1)/60, (position_data(:,5)-position_data(:,2)), '-', 'LineWidth', 1.5, ...
+		'Color', run_colours(i,:), 'DisplayName', run_labels{i})
+end
+
+yline(10^(-5), 'k:', 'DisplayName', 'R_A + R_B')
+axis([0,180,8.9*10^(-6),10.1*10^(-6)])
+legend('Location','best')
+
+
+
+
+
+title("Hertz Cell Separation")
+ylabel("Separation (m)")
+xlabel("Time (min)")
+SaveAsPngEpsAndFig(-1,'HertzCellRelaxationSweep', 12, 7/5, 12)
+
