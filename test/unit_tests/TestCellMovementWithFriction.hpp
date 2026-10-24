@@ -33,8 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef TESTHELLO_HPP_
-#define TESTHELLO_HPP_
+#ifndef TESTCELLMOVEMENTWITHFRICTION_HPP_
+#define TESTCELLMOVEMENTWITHFRICTION_HPP_
 
 #include <cxxtest/TestSuite.h>
 /* Most Chaste code uses PETSc to solve linear algebra problems.  This involves starting PETSc at the beginning of a test-suite
@@ -60,12 +60,18 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-class TestCellMechanics : public AbstractCellBasedTestSuite
+class TestCellMovementWithFriction : public AbstractCellBasedTestSuite
 {
 public:
 /*
- * 1 unit in Chaste is ~ 1 cell width/10um
- * The cell should move with an initial velocity of 10um/minute, i.e. 1 cell width/minute
+ * No cell interactions so can set 1 unit of length = 1 um and time to be seconds
+ * 
+ * The cell should move with a velocity of 10nm/minute, when the force is applied.
+ * 
+ * drag = 1.0 (assuming damping constant is 1.0)
+ * 
+ * Applied force  = 0.01/60 
+ * 
  * Total time = 12s, 
  */
     void TestCellMechanicsCellMovement() {
@@ -83,13 +89,13 @@ public:
 
       // Set initial conditions
       // Expressed in units of simulation units/hour
-      // Assuming 1 unit = 10um
+      // Assuming 1 unit = 1um
       c_vector<double, 2> initialVelocity;
-      initialVelocity[0] = 20.0;
+      initialVelocity[0] = 0.01/60.0;
       initialVelocity[1] = 0.0;
 
-      double velocity_start_time = 3;
-      double velocity_end_time = 6;
+      double velocity_start_time = 3; // seconds
+      double velocity_end_time = 6; // seconds
 
       MAKE_PTR(InstantaneousVelocityForce<2>, force);
       force->SetVelocity(initialVelocity);
@@ -99,7 +105,7 @@ public:
       // Setup cell population
       NodeBasedCellPopulation<2> cell_population(mesh, cells);
       cell_population.Update();
-      cell_population.SetDampingConstantNormal(7.2);
+      cell_population.SetDampingConstantNormal(1.0);//7.2);
 
       // Add node location writer
       using LocationWriter = NodeLocationWriter<2, 2>;
@@ -118,17 +124,17 @@ public:
       simulator.SetOutputDirectory("PerMedCoE/TestCellMovementWithFriction");
       simulator.SetEndTime(12); // 12 seconds
       simulator.SetDt(0.1); // 0.1 seconds, so 120 time steps in total
-      simulator.SetSamplingTimestepMultiple(2); // output every 0.1 second      
+      simulator.SetSamplingTimestepMultiple(2); // output every 0.2 second      
       simulator.AddForce(force);
 
       // Perform simulation
       simulator.Solve();  
 
-      // Check that the cell has moved approximately the right distance (we expect it to move 3 cell widths in total, as the velocity is 1 cell width/minute for 3 minutes, and 1 unit = 1 cell width)
+      // Check that the cell has moved approximately the right distance.
       c_vector<double, 2> final_location = cell_population.GetNode(0)->rGetLocation();
       double distance_moved = sqrt(final_location[0]*final_location[0] + final_location[1]*final_location[1]);
-      TS_ASSERT_DELTA(distance_moved, 8.3333, 0.01); 
+      TS_ASSERT_DELTA(distance_moved, 0.0005, 0.000001); 
     }
 };
 
-#endif 
+#endif // TESTCELLMOVEMENTWITHFRICTION_HPP_

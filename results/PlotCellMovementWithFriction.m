@@ -3,7 +3,7 @@ clear; close all;
 
 addpath ../../ChasteNumericalMethods/MatlabScripts/
 
-base_dir = '../../../testoutput/PerMedCoE/TestCellMovementWithFriction/';
+base_dir = '../../../output/PerMedCoE/TestCellMovementWithFriction/';
 
 position_data = load([base_dir,'/results_from_time_0/node_locations.dat']);
 
@@ -13,7 +13,7 @@ velocity_data = load([base_dir,'/results_from_time_0/cell_velocities.dat']);
 
 plot(position_data(:,1),position_data(:,2),'kx')
 hold on 
-plot([0,12],8.33333*[1,1],'k:')
+plot([0,12],0.0005*[1,1],'k:')
 
 title("Cell Position")
 ylabel("Position (um)")
